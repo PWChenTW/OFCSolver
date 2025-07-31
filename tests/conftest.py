@@ -39,7 +39,7 @@ async def test_redis() -> AsyncGenerator[None, None]:
 def test_settings():
     """Test application settings."""
     from src.config import Settings
-    
+
     return Settings(
         environment="testing",
         debug=True,
@@ -48,13 +48,9 @@ def test_settings():
             "port": 5432,
             "name": "ofc_solver_test",
             "user": "postgres",
-            "password": "postgres"
+            "password": "postgres",
         },
-        redis={
-            "host": "localhost",
-            "port": 6379,
-            "database": 1
-        }
+        redis={"host": "localhost", "port": 6379, "database": 1},
     )
 
 
@@ -63,7 +59,7 @@ async def test_client():
     """Test HTTP client."""
     from fastapi.testclient import TestClient
     from src.main import create_app
-    
+
     app = create_app()
     with TestClient(app) as client:
         yield client
