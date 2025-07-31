@@ -3,9 +3,10 @@ Pytest configuration and shared fixtures.
 """
 
 import asyncio
+from typing import AsyncGenerator, Generator
+
 import pytest
 import pytest_asyncio
-from typing import AsyncGenerator, Generator
 
 # Configure pytest-asyncio
 pytest_asyncio.auto_mode = True
@@ -58,6 +59,7 @@ def test_settings():
 async def test_client():
     """Test HTTP client."""
     from fastapi.testclient import TestClient
+
     from src.main import create_app
 
     app = create_app()

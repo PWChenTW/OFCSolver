@@ -13,12 +13,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
+from src.infrastructure.monitoring.health_checker import router as health_router
+from src.infrastructure.web.api.analysis_controller import router as analysis_router
+from src.infrastructure.web.api.game_controller import router as game_router
+from src.infrastructure.web.api.training_controller import router as training_router
 from src.infrastructure.web.middleware.auth_middleware import AuthenticationMiddleware
 from src.infrastructure.web.middleware.rate_limiter import RateLimitMiddleware
-from src.infrastructure.web.api.game_controller import router as game_router
-from src.infrastructure.web.api.analysis_controller import router as analysis_router
-from src.infrastructure.web.api.training_controller import router as training_router
-from src.infrastructure.monitoring.health_checker import router as health_router
 
 # Configure logging
 logging.basicConfig(

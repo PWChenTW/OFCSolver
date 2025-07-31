@@ -5,9 +5,9 @@ Health check endpoints and system status monitoring.
 import asyncio
 import time
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 # from src.infrastructure.persistence.postgresql.database import get_database
