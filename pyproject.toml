@@ -87,7 +87,6 @@ ofc-worker = "src.infrastructure.external.messaging.celery_tasks:run_worker"
 [tool.black]
 line-length = 88
 target-version = ['py311']
-include = '\.pyi?$'
 extend-exclude = '''
 /(
   # directories
