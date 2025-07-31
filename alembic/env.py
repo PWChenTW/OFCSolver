@@ -39,12 +39,12 @@ target_metadata = Base.metadata
 def get_database_url():
     """Get database URL from environment or settings."""
     # Allow overriding from environment
-    db_host = os.getenv('DB_HOST', settings.database.host)
-    db_port = os.getenv('DB_PORT', str(settings.database.port))
-    db_name = os.getenv('DB_NAME', settings.database.name)
-    db_user = os.getenv('DB_USER', settings.database.user)
-    db_password = os.getenv('DB_PASSWORD', settings.database.password)
-    
+    db_host = os.getenv("DB_HOST", settings.database.host)
+    db_port = os.getenv("DB_PORT", str(settings.database.port))
+    db_name = os.getenv("DB_NAME", settings.database.name)
+    db_user = os.getenv("DB_USER", settings.database.user)
+    db_password = os.getenv("DB_PASSWORD", settings.database.password)
+
     return f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 
@@ -81,8 +81,8 @@ def run_migrations_online() -> None:
     """
     # Override the sqlalchemy.url with our constructed URL
     configuration = config.get_section(config.config_ini_section)
-    configuration['sqlalchemy.url'] = get_database_url()
-    
+    configuration["sqlalchemy.url"] = get_database_url()
+
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
@@ -90,10 +90,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, 
-            target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
