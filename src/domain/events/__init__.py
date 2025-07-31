@@ -13,44 +13,42 @@ Event Categories:
 
 # Game events
 from .game_events import (
+    CardPlacedEvent,
     GameCompletedEvent,
-    CardPlacedEvent, 
-    RoundStartedEvent,
     PlayerJoinedEvent,
-    PlayerLeftEvent
+    PlayerLeftEvent,
+    RoundStartedEvent,
 )
 
-# Strategy events  
+# Strategy events
 from .strategy_events import (
-    AnalysisRequestedEvent,
     AnalysisCompletedEvent,
-    StrategyCalculatedEvent,
+    AnalysisRequestedEvent,
+    CalculationCompletedEvent,
     CalculationStartedEvent,
-    CalculationCompletedEvent
+    StrategyCalculatedEvent,
 )
 
 # Training events
 from .training_events import (
+    ExerciseCompletedEvent,
     TrainingScenarioCompletedEvent,
     TrainingSessionStartedEvent,
-    ExerciseCompletedEvent
 )
 
 __all__ = [
     # Game events
     "GameCompletedEvent",
     "CardPlacedEvent",
-    "RoundStartedEvent", 
+    "RoundStartedEvent",
     "PlayerJoinedEvent",
     "PlayerLeftEvent",
-    
     # Strategy events
     "AnalysisRequestedEvent",
     "AnalysisCompletedEvent",
     "StrategyCalculatedEvent",
-    "CalculationStartedEvent", 
+    "CalculationStartedEvent",
     "CalculationCompletedEvent",
-    
     # Training events
     "TrainingScenarioCompletedEvent",
     "TrainingSessionStartedEvent",

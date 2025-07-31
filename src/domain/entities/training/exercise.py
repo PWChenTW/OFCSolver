@@ -13,15 +13,15 @@ ExerciseId = str
 class Exercise(DomainEntity):
     """
     Training exercise entity - placeholder implementation.
-    
+
     TODO: Implement exercise logic including:
     - Problem definition
     - Solution validation
     - Scoring system
     - Hints and feedback
     """
-    
-    def __init__(self, exercise_id: ExerciseId):
+
+    def __init__(self, exercise_id: ExerciseId) -> None:
         super().__init__(exercise_id)
         # TODO: Implement exercise logic
         pass

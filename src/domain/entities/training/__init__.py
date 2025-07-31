@@ -5,12 +5,12 @@ Contains entities for the training system bounded context,
 including training sessions, scenarios, and exercises.
 """
 
-from .training_session import TrainingSession
-from .scenario import Scenario
 from .exercise import Exercise
+from .scenario import Scenario
+from .training_session import TrainingSession
 
 __all__ = [
     "TrainingSession",
-    "Scenario", 
+    "Scenario",
     "Exercise",
 ]

@@ -13,6 +13,7 @@ from ..base import DomainEvent
 @dataclass(frozen=True)
 class TrainingSessionStartedEvent(DomainEvent):
     """Event fired when a training session starts."""
+
     session_id: str
     user_id: str
     scenario_type: str
@@ -22,6 +23,7 @@ class TrainingSessionStartedEvent(DomainEvent):
 @dataclass(frozen=True)
 class TrainingScenarioCompletedEvent(DomainEvent):
     """Event fired when a training scenario is completed."""
+
     session_id: str
     user_id: str
     scenario_id: str
@@ -33,6 +35,7 @@ class TrainingScenarioCompletedEvent(DomainEvent):
 @dataclass(frozen=True)
 class ExerciseCompletedEvent(DomainEvent):
     """Event fired when an exercise is completed."""
+
     exercise_id: str
     user_id: str
     session_id: str

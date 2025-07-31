@@ -6,8 +6,8 @@ including analysis sessions, strategy nodes, and calculations.
 """
 
 from .analysis_session import AnalysisSession
-from .strategy_node import StrategyNode  
 from .calculation import Calculation
+from .strategy_node import StrategyNode
 
 __all__ = [
     "AnalysisSession",

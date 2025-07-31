@@ -20,17 +20,17 @@ __author__ = "OFC Solver Team"
 
 # Import key domain abstractions for easy access
 from .base import (
+    AggregateRoot,
     DomainEntity,
-    ValueObject,
     DomainEvent,
     DomainService,
     Repository,
-    AggregateRoot
+    ValueObject,
 )
 
 __all__ = [
     "DomainEntity",
-    "ValueObject", 
+    "ValueObject",
     "DomainEvent",
     "DomainService",
     "Repository",

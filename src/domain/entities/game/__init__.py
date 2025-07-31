@@ -13,6 +13,6 @@ from .round import Round
 __all__ = [
     "Game",
     "Player",
-    "Position", 
+    "Position",
     "Round",
 ]

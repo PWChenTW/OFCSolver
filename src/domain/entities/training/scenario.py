@@ -13,15 +13,15 @@ ScenarioId = str
 class Scenario(DomainEntity):
     """
     Training scenario entity - placeholder implementation.
-    
+
     TODO: Implement scenario logic including:
     - Position setup
     - Learning objectives
     - Difficulty rating
     - Solution tracking
     """
-    
-    def __init__(self, scenario_id: ScenarioId):
+
+    def __init__(self, scenario_id: ScenarioId) -> None:
         super().__init__(scenario_id)
         # TODO: Implement scenario logic
         pass

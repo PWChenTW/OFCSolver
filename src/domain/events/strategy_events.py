@@ -14,6 +14,7 @@ from ..value_objects import Strategy
 @dataclass(frozen=True)
 class AnalysisRequestedEvent(DomainEvent):
     """Event fired when strategy analysis is requested."""
+
     session_id: str
     position_id: str
     analysis_type: str
@@ -24,6 +25,7 @@ class AnalysisRequestedEvent(DomainEvent):
 @dataclass(frozen=True)
 class AnalysisCompletedEvent(DomainEvent):
     """Event fired when strategy analysis is completed."""
+
     session_id: str
     optimal_strategy: Strategy
     calculation_time_ms: int
@@ -34,6 +36,7 @@ class AnalysisCompletedEvent(DomainEvent):
 @dataclass(frozen=True)
 class StrategyCalculatedEvent(DomainEvent):
     """Event fired when a strategy is calculated."""
+
     session_id: str
     position_id: str
     optimal_strategy: Strategy
@@ -43,6 +46,7 @@ class StrategyCalculatedEvent(DomainEvent):
 @dataclass(frozen=True)
 class CalculationStartedEvent(DomainEvent):
     """Event fired when a calculation starts."""
+
     calculation_id: str
     calculation_type: str
     position_id: str
@@ -52,6 +56,7 @@ class CalculationStartedEvent(DomainEvent):
 @dataclass(frozen=True)
 class CalculationCompletedEvent(DomainEvent):
     """Event fired when a calculation completes."""
+
     calculation_id: str
     calculation_type: str
     elapsed_time_ms: int
