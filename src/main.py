@@ -2,7 +2,6 @@
 Main application entry point for the OFC Solver System.
 """
 
-import asyncio
 import logging
 import sys
 from contextlib import asynccontextmanager
@@ -13,24 +12,26 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
-from src.infrastructure.web.middleware.auth_middleware import AuthenticationMiddleware
-from src.infrastructure.web.middleware.rate_limiter import RateLimitMiddleware
+# from src.infrastructure.web.middleware.auth_middleware import (
+#     AuthenticationMiddleware,
+# )
+# from src.infrastructure.web.middleware.rate_limiter import RateLimitMiddleware
 from src.infrastructure.web.api.game_controller import router as game_router
-from src.infrastructure.web.api.analysis_controller import router as analysis_router
-from src.infrastructure.web.api.training_controller import router as training_router
+from src.infrastructure.web.api.analysis_controller import (
+    router as analysis_router,
+)
+from src.infrastructure.web.api.training_controller import (
+    router as training_router,
+)
 from src.infrastructure.monitoring.health_checker import router as health_router
 from src.infrastructure.database.connection_pool import connection_pool
 from src.infrastructure.database.session import db_session
-from src.config import settings
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler("logs/app.log")
-    ]
+    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler("logs/app.log")],
 )
 
 logger = logging.getLogger(__name__)
@@ -43,38 +44,38 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     # Startup
     logger.info("Starting OFC Solver System...")
-    
+
     try:
         # Initialize all connection pools
         await connection_pool.initialize()
-        
+
         # Initialize database session
         db_session.init()
-        
+
         # Warm up connections
         health_status = await connection_pool.health_check()
         logger.info(f"Connection health status: {health_status}")
-        
+
         logger.info("OFC Solver System started successfully")
-        
+
     except Exception as e:
         logger.error(f"Failed to start OFC Solver System: {e}")
         raise
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down OFC Solver System...")
-    
+
     try:
         # Close all connections
         await connection_pool.shutdown()
-        
+
         # Close database session
         await db_session.close()
-        
+
         logger.info("OFC Solver System shutdown completed")
-        
+
     except Exception as e:
         logger.error(f"Error during shutdown: {e}")
 
@@ -90,9 +91,9 @@ def create_app() -> FastAPI:
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
-        lifespan=lifespan
+        lifespan=lifespan,
     )
-    
+
     # Add middleware
     app.add_middleware(
         CORSMiddleware,
@@ -101,19 +102,19 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
+
     app.add_middleware(GZipMiddleware, minimum_size=1000)
-    
+
     # Add custom middleware (will be implemented later)
     # app.add_middleware(AuthenticationMiddleware)
     # app.add_middleware(RateLimitMiddleware)
-    
+
     # Include routers
     app.include_router(health_router, prefix="/health", tags=["health"])
     app.include_router(game_router, prefix="/api/v1/games", tags=["games"])
     app.include_router(analysis_router, prefix="/api/v1/analysis", tags=["analysis"])
     app.include_router(training_router, prefix="/api/v1/training", tags=["training"])
-    
+
     return app
 
 
@@ -122,7 +123,7 @@ def run_server():
     Run the development server.
     """
     app = create_app()
-    
+
     uvicorn.run(
         app,
         host="0.0.0.0",

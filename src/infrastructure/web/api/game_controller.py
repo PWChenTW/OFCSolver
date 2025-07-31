@@ -20,18 +20,21 @@ router = APIRouter()
 # Request/Response models
 class CreateGameRequest(BaseModel):
     """Request model for creating a new game."""
+
     player_count: int = 2
     rules_variant: str = "standard"
 
 
 class PlaceCardRequest(BaseModel):
     """Request model for placing a card."""
+
     card: str  # e.g., "As" for Ace of Spades
     position: str  # e.g., "top_1", "middle_3", "bottom_5"
 
 
 class GameResponse(BaseModel):
     """Response model for game information."""
+
     id: str
     player_count: int
     current_round: int
@@ -42,6 +45,7 @@ class GameResponse(BaseModel):
 
 class GameStateResponse(BaseModel):
     """Response model for current game state."""
+
     game_id: str
     current_player: int
     round_number: int
@@ -64,19 +68,18 @@ async def get_game_query_handler():
 
 @router.post("/", response_model=GameResponse, status_code=status.HTTP_201_CREATED)
 async def create_game(
-    request: CreateGameRequest,
-    command_handler=Depends(get_game_command_handler)
+    request: CreateGameRequest, command_handler=Depends(get_game_command_handler)
 ) -> GameResponse:
     """
     Create a new OFC game.
-    
+
     Args:
         request: Game creation parameters
         command_handler: Injected command handler
-        
+
     Returns:
         Created game information
-        
+
     Raises:
         HTTPException: If game creation fails
     """
@@ -87,7 +90,7 @@ async def create_game(
         #     rules_variant=request.rules_variant
         # )
         # game = await command_handler.handle(command)
-        
+
         # Placeholder response
         return GameResponse(
             id="game-123",
@@ -95,30 +98,29 @@ async def create_game(
             current_round=1,
             status="active",
             created_at="2024-01-01T00:00:00Z",
-            players=[]
+            players=[],
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create game: {str(e)}"
+            detail=f"Failed to create game: {str(e)}",
         )
 
 
 @router.get("/{game_id}", response_model=GameResponse)
 async def get_game(
-    game_id: UUID,
-    query_handler=Depends(get_game_query_handler)
+    game_id: UUID, query_handler=Depends(get_game_query_handler)
 ) -> GameResponse:
     """
     Get game information by ID.
-    
+
     Args:
         game_id: Game identifier
         query_handler: Injected query handler
-        
+
     Returns:
         Game information
-        
+
     Raises:
         HTTPException: If game not found
     """
@@ -126,7 +128,7 @@ async def get_game(
         # TODO: Implement query handling
         # query = GetGameQuery(game_id=game_id)
         # game = await query_handler.handle(query)
-        
+
         # Placeholder response
         return GameResponse(
             id=str(game_id),
@@ -134,35 +136,34 @@ async def get_game(
             current_round=1,
             status="active",
             created_at="2024-01-01T00:00:00Z",
-            players=[]
+            players=[],
         )
     except Exception as e:
         if "not found" in str(e).lower():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Game {game_id} not found"
+                detail=f"Game {game_id} not found",
             )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get game: {str(e)}"
+            detail=f"Failed to get game: {str(e)}",
         )
 
 
 @router.get("/{game_id}/state", response_model=GameStateResponse)
 async def get_game_state(
-    game_id: UUID,
-    query_handler=Depends(get_game_query_handler)
+    game_id: UUID, query_handler=Depends(get_game_query_handler)
 ) -> GameStateResponse:
     """
     Get current game state for analysis.
-    
+
     Args:
         game_id: Game identifier
         query_handler: Injected query handler
-        
+
     Returns:
         Current game state
-        
+
     Raises:
         HTTPException: If game not found
     """
@@ -170,24 +171,24 @@ async def get_game_state(
         # TODO: Implement query handling
         # query = GetGameStateQuery(game_id=game_id)
         # state = await query_handler.handle(query)
-        
+
         # Placeholder response
         return GameStateResponse(
             game_id=str(game_id),
             current_player=0,
             round_number=1,
             players_hands={},
-            remaining_cards=[]
+            remaining_cards=[],
         )
     except Exception as e:
         if "not found" in str(e).lower():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Game {game_id} not found"
+                detail=f"Game {game_id} not found",
             )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get game state: {str(e)}"
+            detail=f"Failed to get game state: {str(e)}",
         )
 
 
@@ -195,16 +196,16 @@ async def get_game_state(
 async def place_card(
     game_id: UUID,
     request: PlaceCardRequest,
-    command_handler=Depends(get_game_command_handler)
+    command_handler=Depends(get_game_command_handler),
 ) -> None:
     """
     Place a card in the game.
-    
+
     Args:
         game_id: Game identifier
         request: Card placement parameters
         command_handler: Injected command handler
-        
+
     Raises:
         HTTPException: If placement is invalid or game not found
     """
@@ -220,17 +221,17 @@ async def place_card(
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid card placement: {str(e)}"
+            detail=f"Invalid card placement: {str(e)}",
         )
     except Exception as e:
         if "not found" in str(e).lower():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Game {game_id} not found"
+                detail=f"Game {game_id} not found",
             )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to place card: {str(e)}"
+            detail=f"Failed to place card: {str(e)}",
         )
 
 
@@ -239,17 +240,17 @@ async def list_games(
     limit: int = 10,
     offset: int = 0,
     status_filter: Optional[str] = None,
-    query_handler=Depends(get_game_query_handler)
+    query_handler=Depends(get_game_query_handler),
 ) -> List[GameResponse]:
     """
     List games with pagination and filtering.
-    
+
     Args:
         limit: Maximum number of games to return
         offset: Number of games to skip
         status_filter: Filter by game status
         query_handler: Injected query handler
-        
+
     Returns:
         List of games
     """
@@ -261,11 +262,11 @@ async def list_games(
         #     status_filter=status_filter
         # )
         # games = await query_handler.handle(query)
-        
+
         # Placeholder response
         return []
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to list games: {str(e)}"
+            detail=f"Failed to list games: {str(e)}",
         )
