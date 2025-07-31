@@ -19,6 +19,9 @@ from src.infrastructure.web.api.game_controller import router as game_router
 from src.infrastructure.web.api.analysis_controller import router as analysis_router
 from src.infrastructure.web.api.training_controller import router as training_router
 from src.infrastructure.monitoring.health_checker import router as health_router
+from src.infrastructure.database.connection_pool import connection_pool
+from src.infrastructure.database.session import db_session
+from src.config import settings
 
 # Configure logging
 logging.basicConfig(
@@ -41,24 +44,39 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Startup
     logger.info("Starting OFC Solver System...")
     
-    # Initialize database connections
-    # Initialize Redis connections
-    # Initialize background task queues
-    # Warm up caches
-    
-    logger.info("OFC Solver System started successfully")
+    try:
+        # Initialize all connection pools
+        await connection_pool.initialize()
+        
+        # Initialize database session
+        db_session.init()
+        
+        # Warm up connections
+        health_status = await connection_pool.health_check()
+        logger.info(f"Connection health status: {health_status}")
+        
+        logger.info("OFC Solver System started successfully")
+        
+    except Exception as e:
+        logger.error(f"Failed to start OFC Solver System: {e}")
+        raise
     
     yield
     
     # Shutdown
     logger.info("Shutting down OFC Solver System...")
     
-    # Close database connections
-    # Close Redis connections
-    # Stop background tasks
-    # Clean up resources
-    
-    logger.info("OFC Solver System shutdown completed")
+    try:
+        # Close all connections
+        await connection_pool.shutdown()
+        
+        # Close database session
+        await db_session.close()
+        
+        logger.info("OFC Solver System shutdown completed")
+        
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}")
 
 
 def create_app() -> FastAPI:
