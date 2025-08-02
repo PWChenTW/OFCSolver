@@ -149,33 +149,42 @@ feedback = response.json()
 
 ## 📊 Development Progress
 
-### Completed Components (6/29 tasks - 20.7%)
+### Completed Components (7/29 tasks - 24.1%)
 
 #### Phase 1: Foundation ✅
 - [x] **TASK-001**: Project Infrastructure Setup
 - [x] **TASK-002**: Database Setup  
 - [x] **TASK-003**: Core Domain Structure
 
-#### Phase 2: Core Domain 🔄
+#### Phase 2: Core Domain ✅
 - [x] **TASK-004**: Card and Hand Models
 - [x] **TASK-005**: Game Entity Implementation
 - [x] **TASK-006**: Hand Evaluator Service
-- [ ] **TASK-007**: Game Validator Service (next)
+- [x] **TASK-007**: Game Validator Service
 
-#### Phase 3: Strategy Engine (upcoming)
+#### Phase 3: Strategy Engine (next)
 - [ ] **TASK-008**: Game Tree Implementation
 - [ ] **TASK-009**: Strategy Calculator Core
 - [ ] **TASK-010**: Monte Carlo Simulator
 
-### Try the Demo
+### Try the Demos
 
 Test the current implementation:
 
 ```bash
+# Core game functionality
 python demo_ofc_game.py
+
+# Game validation functionality
+python demo_game_validator.py
 ```
 
-This demonstrates card/hand creation, hand evaluation with royalties, OFC validation, and game initialization.
+These demonstrate:
+- Card/hand creation and evaluation
+- Hand evaluation with royalties
+- OFC validation and progression rules
+- Game initialization and management
+- **NEW**: Comprehensive game validation (card placement, turn order, completion checking)
 
 ## 🧪 Development
 
