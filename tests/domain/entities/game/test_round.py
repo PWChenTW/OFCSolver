@@ -22,7 +22,7 @@ class TestRound:
             player_ids=player_ids,
             starting_player_id="player2",
         )
-        
+
         assert round_entity.id == "round1"
         assert round_entity.round_number == 1
         assert round_entity.game_id == "game1"
@@ -45,7 +45,7 @@ class TestRound:
             player_ids=player_ids,
             starting_player_id="player2",
         )
-        
+
         # Should start with player2
         assert round_entity.get_current_player_id() == "player2"
 
@@ -58,10 +58,10 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         # Complete the round
         round_entity._status = RoundStatus.COMPLETED
-        
+
         assert round_entity.get_current_player_id() is None
 
     def test_has_player_acted(self):
@@ -73,7 +73,7 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         assert not round_entity.has_player_acted("p1")
         assert not round_entity.has_player_acted("p2")
 
@@ -87,7 +87,7 @@ class TestRound:
             player_ids=player_ids,
             starting_player_id="p1",
         )
-        
+
         remaining = round_entity.get_players_remaining()
         assert len(remaining) == 3
         assert all(pid in remaining for pid in player_ids)
@@ -101,15 +101,15 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         card = Card.from_string("As")
         round_entity.record_placement("p1", card, CardPosition.TOP)
-        
+
         # Check placement recorded
         assert round_entity.get_placement_count() == 1
         assert round_entity.has_player_acted("p1")
         assert not round_entity.has_player_acted("p2")
-        
+
         # Check placement details
         placements = round_entity.placements
         assert len(placements) == 1
@@ -127,10 +127,12 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         # Try to place for p2 when it's p1's turn
         with pytest.raises(ValueError, match="not player p2's turn"):
-            round_entity.record_placement("p2", Card.from_string("As"), CardPosition.TOP)
+            round_entity.record_placement(
+                "p2", Card.from_string("As"), CardPosition.TOP
+            )
 
     def test_record_placement_inactive_round(self):
         """Test recording placement in inactive round."""
@@ -141,11 +143,15 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         round_entity._status = RoundStatus.COMPLETED
-        
-        with pytest.raises(ValueError, match="Cannot record placement in inactive round"):
-            round_entity.record_placement("p1", Card.from_string("As"), CardPosition.TOP)
+
+        with pytest.raises(
+            ValueError, match="Cannot record placement in inactive round"
+        ):
+            round_entity.record_placement(
+                "p1", Card.from_string("As"), CardPosition.TOP
+            )
 
     def test_record_placement_already_acted(self):
         """Test recording placement when player already acted."""
@@ -156,13 +162,15 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         # First placement
         round_entity.record_placement("p1", Card.from_string("As"), CardPosition.TOP)
-        
+
         # Try to place again for p1 (but it's now p2's turn)
         with pytest.raises(ValueError, match="not player p1's turn"):
-            round_entity.record_placement("p1", Card.from_string("Ks"), CardPosition.MIDDLE)
+            round_entity.record_placement(
+                "p1", Card.from_string("Ks"), CardPosition.MIDDLE
+            )
 
     def test_turn_advancement(self):
         """Test turn advancing after placement."""
@@ -173,15 +181,15 @@ class TestRound:
             player_ids=["p1", "p2", "p3"],
             starting_player_id="p1",
         )
-        
+
         # p1's turn
         assert round_entity.get_current_player_id() == "p1"
         round_entity.record_placement("p1", Card.from_string("As"), CardPosition.TOP)
-        
+
         # Should advance to p2
         assert round_entity.get_current_player_id() == "p2"
         round_entity.record_placement("p2", Card.from_string("Ks"), CardPosition.MIDDLE)
-        
+
         # Should advance to p3
         assert round_entity.get_current_player_id() == "p3"
 
@@ -194,13 +202,13 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         # Both players place cards
         round_entity.record_placement("p1", Card.from_string("As"), CardPosition.TOP)
         assert round_entity.is_active
-        
+
         round_entity.record_placement("p2", Card.from_string("Ks"), CardPosition.MIDDLE)
-        
+
         # Round should be completed
         assert round_entity.is_completed
         assert not round_entity.is_active
@@ -216,9 +224,9 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         round_entity.cancel_round("Player disconnected")
-        
+
         assert round_entity.status == RoundStatus.CANCELLED
         assert not round_entity.is_active
         assert round_entity.completed_at is not None
@@ -232,9 +240,9 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         round_entity._status = RoundStatus.COMPLETED
-        
+
         with pytest.raises(ValueError, match="Cannot cancel inactive round"):
             round_entity.cancel_round()
 
@@ -247,17 +255,17 @@ class TestRound:
             player_ids=["p1", "p2", "p3"],
             starting_player_id="p1",
         )
-        
+
         # Record placements
         round_entity.record_placement("p1", Card.from_string("As"), CardPosition.TOP)
         round_entity.record_placement("p2", Card.from_string("Ks"), CardPosition.MIDDLE)
         round_entity.record_placement("p3", Card.from_string("Qs"), CardPosition.BOTTOM)
-        
+
         # Get p1's placements
         p1_placements = round_entity.get_placements_by_player("p1")
         assert len(p1_placements) == 1
         assert p1_placements[0].card == Card.from_string("As")
-        
+
         # Get p2's placements
         p2_placements = round_entity.get_placements_by_player("p2")
         assert len(p2_placements) == 1
@@ -272,7 +280,7 @@ class TestRound:
             player_ids=["p1", "p2", "p3"],
             starting_player_id="p2",
         )
-        
+
         turn_order = round_entity.get_turn_order()
         # Should start with p2, then p3, then p1
         assert turn_order == ["p2", "p3", "p1"]
@@ -286,7 +294,7 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         elapsed = round_entity.get_elapsed_time()
         assert isinstance(elapsed, float)
         assert elapsed >= 0
@@ -300,12 +308,12 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         # Add a placement
         round_entity.record_placement("p1", Card.from_string("As"), CardPosition.TOP)
-        
+
         summary = round_entity.get_round_summary()
-        
+
         assert isinstance(summary, dict)
         assert summary["round_id"] == "round1"
         assert summary["round_number"] == 1
@@ -325,7 +333,7 @@ class TestRound:
             player_ids=["p1", "p2"],
             starting_player_id="p1",
         )
-        
+
         repr_str = repr(round_entity)
         assert "Round" in repr_str
         assert "round1" in repr_str

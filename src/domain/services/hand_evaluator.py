@@ -135,7 +135,11 @@ class HandEvaluator(DomainService):
             kicker = count_groups[1][0] if len(count_groups) > 1 else 0
             return HandType.FOUR_OF_A_KIND, quad_rank, [kicker] if kicker else []
 
-        elif count_groups[0][1] == 3 and len(count_groups) > 1 and count_groups[1][1] == 2:  # Full house
+        elif (
+            count_groups[0][1] == 3
+            and len(count_groups) > 1
+            and count_groups[1][1] == 2
+        ):  # Full house
             trips_rank = count_groups[0][0]
             pair_rank = count_groups[1][0]
             return HandType.FULL_HOUSE, trips_rank, [pair_rank]
@@ -151,11 +155,19 @@ class HandEvaluator(DomainService):
             kickers = [rank for rank, count in count_groups[1:]]
             return HandType.THREE_OF_A_KIND, trips_rank, kickers
 
-        elif count_groups[0][1] == 2 and len(count_groups) > 1 and count_groups[1][1] == 2:  # Two pair
+        elif (
+            count_groups[0][1] == 2
+            and len(count_groups) > 1
+            and count_groups[1][1] == 2
+        ):  # Two pair
             high_pair = max(count_groups[0][0], count_groups[1][0])
             low_pair = min(count_groups[0][0], count_groups[1][0])
             kicker = count_groups[2][0] if len(count_groups) > 2 else 0
-            return HandType.TWO_PAIR, high_pair, [low_pair, kicker] if kicker else [low_pair]
+            return (
+                HandType.TWO_PAIR,
+                high_pair,
+                [low_pair, kicker] if kicker else [low_pair],
+            )
 
         elif count_groups[0][1] == 2:  # Pair
             pair_rank = count_groups[0][0]

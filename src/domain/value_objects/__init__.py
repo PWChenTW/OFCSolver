@@ -40,7 +40,7 @@ __all__ = [
     "Suit",
     "Rank",
     "Hand",
-    "HandValidationError", 
+    "HandValidationError",
     "InvalidCardPlacementError",
     "Deck",
     "GameRules",

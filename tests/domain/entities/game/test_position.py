@@ -16,11 +16,13 @@ class TestPosition:
         players_hands = {}
         for i in range(num_players):
             player_id = f"player{i+1}"
-            cards = Card.parse_cards("As Ks Qs Js Ts")[:i+2]  # Different cards per player
+            cards = Card.parse_cards("As Ks Qs Js Ts")[
+                : i + 2
+            ]  # Different cards per player
             players_hands[player_id] = Hand.from_cards(cards)
-        
+
         remaining_cards = Card.parse_cards("9s 8s 7s 6s 5s 4s 3s 2s")
-        
+
         return Position(
             game_id="game1",
             players_hands=players_hands,
@@ -33,7 +35,7 @@ class TestPosition:
     def test_position_initialization(self):
         """Test position creation and properties."""
         position = self.create_test_position()
-        
+
         assert position.game_id == "game1"
         assert position.player_count == 2
         assert position.current_player_id == "player1"
@@ -53,24 +55,24 @@ class TestPosition:
             rules=GameRules(),
             position_id="custom_pos_123",
         )
-        
+
         assert position.id == "custom_pos_123"
 
     def test_get_player_hand(self):
         """Test getting specific player's hand."""
         position = self.create_test_position()
-        
+
         hand = position.get_player_hand("player1")
         assert hand is not None
         assert len(hand.hand_cards) == 2
-        
+
         # Non-existent player
         assert position.get_player_hand("invalid_player") is None
 
     def test_get_current_player_hand(self):
         """Test getting current player's hand."""
         position = self.create_test_position()
-        
+
         hand = position.get_current_player_hand()
         assert hand is not None
         assert hand == position.get_player_hand("player1")
@@ -85,14 +87,14 @@ class TestPosition:
             round_number=1,
             rules=GameRules(),
         )
-        
+
         with pytest.raises(ValueError, match="Current player invalid_player not found"):
             position.get_current_player_hand()
 
     def test_get_opponent_hands(self):
         """Test getting opponent hands."""
         position = self.create_test_position(3)
-        
+
         opponent_hands = position.get_opponent_hands()
         assert len(opponent_hands) == 2
         assert "player1" not in opponent_hands
@@ -104,7 +106,7 @@ class TestPosition:
         # Non-terminal position
         position = self.create_test_position()
         assert not position.is_terminal_position()
-        
+
         # Terminal position (all hands complete)
         complete_hands = {}
         for i in range(2):
@@ -114,7 +116,7 @@ class TestPosition:
             middle = Card.parse_cards("Js Ts 9s 8s 7s")
             bottom = Card.parse_cards("6s 5s 4s 3s 2s")
             complete_hands[player_id] = Hand.from_layout(top, middle, bottom)
-        
+
         terminal_position = Position(
             game_id="game1",
             players_hands=complete_hands,
@@ -123,7 +125,7 @@ class TestPosition:
             round_number=13,
             rules=GameRules(),
         )
-        
+
         assert terminal_position.is_terminal_position()
 
     def test_game_phase_detection(self):
@@ -133,7 +135,7 @@ class TestPosition:
         assert early_position.is_early_game()
         assert not early_position.is_mid_game()
         assert not early_position.is_end_game()
-        
+
         # Mid game
         mid_position = Position(
             game_id="game1",
@@ -146,7 +148,7 @@ class TestPosition:
         assert not mid_position.is_early_game()
         assert mid_position.is_mid_game()
         assert not mid_position.is_end_game()
-        
+
         # End game
         end_position = Position(
             game_id="game1",
@@ -172,12 +174,12 @@ class TestPosition:
             round_number=1,
             rules=GameRules(),
         )
-        
+
         moves = position.get_legal_moves()
-        
+
         # 3 cards × 3 positions = 9 possible moves
         assert len(moves) == 9
-        
+
         # Check moves are valid
         for move in moves:
             assert isinstance(move, Move)
@@ -190,7 +192,7 @@ class TestPosition:
         top = Card.parse_cards("As Ks Qs")
         hand_cards = Card.parse_cards("Js Ts")
         hand = Hand.from_layout(top, [], [], hand_cards)
-        
+
         position = Position(
             game_id="game1",
             players_hands={"p1": hand},
@@ -199,9 +201,9 @@ class TestPosition:
             round_number=4,
             rules=GameRules(),
         )
-        
+
         moves = position.get_legal_moves()
-        
+
         # 2 cards × 2 positions (middle, bottom) = 4 moves
         assert len(moves) == 4
         # No moves to TOP position
@@ -211,12 +213,12 @@ class TestPosition:
         """Test position hashing for caching."""
         position1 = self.create_test_position()
         hash1 = position1.get_position_hash()
-        
+
         # Same position should have same hash
         position2 = self.create_test_position()
         hash2 = position2.get_position_hash()
         assert hash1 == hash2
-        
+
         # Different positions should have different hashes
         position3 = self.create_test_position()
         position3._round_number = 2
@@ -227,11 +229,11 @@ class TestPosition:
         """Test position equality based on hash."""
         position1 = self.create_test_position()
         position2 = self.create_test_position()
-        
+
         # Same game state
         assert position1 == position2
         assert hash(position1) == hash(position2)
-        
+
         # Different game state
         position3 = self.create_test_position()
         position3._current_player_id = "player2"
@@ -242,10 +244,10 @@ class TestPosition:
         """Test position complexity calculation."""
         position = self.create_test_position()
         complexity = position.get_complexity_score()
-        
+
         assert isinstance(complexity, float)
         assert 0 <= complexity <= 100
-        
+
         # Early game complexity can vary based on factors
         assert 0 <= complexity <= 100
 
@@ -253,7 +255,7 @@ class TestPosition:
         """Test conversion to analysis format."""
         position = self.create_test_position()
         analysis_data = position.to_analysis_format()
-        
+
         assert isinstance(analysis_data, dict)
         assert analysis_data["position_id"] == str(position.id)
         assert analysis_data["game_id"] == "game1"
@@ -276,11 +278,11 @@ class TestPosition:
             round_number=1,
             rules=GameRules(),
         )
-        
+
         # Apply move
         move = Move(card=Card.from_string("As"), position=CardPosition.TOP)
         new_position = position.apply_move(move)
-        
+
         # Check new position state
         assert new_position.game_id == position.game_id
         assert new_position.round_number == position.round_number
@@ -292,7 +294,7 @@ class TestPosition:
     def test_position_representation(self):
         """Test string representation of position."""
         position = self.create_test_position()
-        
+
         repr_str = repr(position)
         assert "Position" in repr_str
         assert position.id in repr_str

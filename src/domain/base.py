@@ -142,9 +142,9 @@ class AggregateRoot(DomainEntity):
     def add_domain_event(self, event: Any) -> None:
         """Add a domain event to the aggregate."""
         # Set aggregate ID if not already set
-        if hasattr(event, 'aggregate_id') and event.aggregate_id is None:
+        if hasattr(event, "aggregate_id") and event.aggregate_id is None:
             # For frozen dataclasses, use object.__setattr__
-            object.__setattr__(event, 'aggregate_id', str(self._id))
+            object.__setattr__(event, "aggregate_id", str(self._id))
 
         self._domain_events.append(event)
 

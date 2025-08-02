@@ -25,14 +25,14 @@ class GameCompletedEvent:
     occurred_at: datetime = field(default_factory=datetime.utcnow)
     event_version: int = 1
     aggregate_id: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary for serialization."""
         result = {}
         for key, value in self.__dict__.items():
             if isinstance(value, datetime):
                 result[key] = value.isoformat()
-            elif hasattr(value, 'to_dict'):
+            elif hasattr(value, "to_dict"):
                 result[key] = value.to_dict()
             else:
                 result[key] = value
@@ -53,14 +53,14 @@ class CardPlacedEvent:
     occurred_at: datetime = field(default_factory=datetime.utcnow)
     event_version: int = 1
     aggregate_id: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary for serialization."""
         result = {}
         for key, value in self.__dict__.items():
             if isinstance(value, datetime):
                 result[key] = value.isoformat()
-            elif hasattr(value, 'to_dict'):
+            elif hasattr(value, "to_dict"):
                 result[key] = value.to_dict()
             else:
                 result[key] = value
@@ -79,14 +79,14 @@ class RoundStartedEvent:
     occurred_at: datetime = field(default_factory=datetime.utcnow)
     event_version: int = 1
     aggregate_id: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary for serialization."""
         result = {}
         for key, value in self.__dict__.items():
             if isinstance(value, datetime):
                 result[key] = value.isoformat()
-            elif hasattr(value, 'to_dict'):
+            elif hasattr(value, "to_dict"):
                 result[key] = value.to_dict()
             else:
                 result[key] = value
@@ -105,14 +105,14 @@ class PlayerJoinedEvent:
     occurred_at: datetime = field(default_factory=datetime.utcnow)
     event_version: int = 1
     aggregate_id: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary for serialization."""
         result = {}
         for key, value in self.__dict__.items():
             if isinstance(value, datetime):
                 result[key] = value.isoformat()
-            elif hasattr(value, 'to_dict'):
+            elif hasattr(value, "to_dict"):
                 result[key] = value.to_dict()
             else:
                 result[key] = value
@@ -131,14 +131,14 @@ class PlayerLeftEvent:
     occurred_at: datetime = field(default_factory=datetime.utcnow)
     event_version: int = 1
     aggregate_id: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary for serialization."""
         result = {}
         for key, value in self.__dict__.items():
             if isinstance(value, datetime):
                 result[key] = value.isoformat()
-            elif hasattr(value, 'to_dict'):
+            elif hasattr(value, "to_dict"):
                 result[key] = value.to_dict()
             else:
                 result[key] = value
