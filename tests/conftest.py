@@ -39,6 +39,7 @@ async def test_redis() -> AsyncGenerator[None, None]:
 @pytest.fixture
 def test_settings():
     """Test application settings."""
+
     # Mock settings to avoid importing from src during test collection
     class MockSettings:
         def __init__(self):
@@ -52,7 +53,7 @@ def test_settings():
                 "password": "postgres",
             }
             self.redis = {"host": "localhost", "port": 6379, "database": 1}
-    
+
     return MockSettings()
 
 
@@ -106,3 +107,4 @@ def test_client():
 
     with TestClient(app) as client:
         yield client
+

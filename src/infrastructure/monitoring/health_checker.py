@@ -315,3 +315,4 @@ async def get_basic_metrics() -> Dict[str, Any]:
             "solver_calculations_total": 0,  # TODO: Get from solver service
         },
     }
+
