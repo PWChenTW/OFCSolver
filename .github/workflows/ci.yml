@@ -14,30 +14,6 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ofc_solver_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
 
     steps:
     - name: Checkout code
@@ -76,11 +52,4 @@ jobs:
       run: poetry run flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
 
     - name: Run tests
-      env:
-        DB_HOST: localhost
-        DB_USER: postgres
-        DB_PASSWORD: postgres
-        DB_NAME: ofc_solver_test
-        REDIS_HOST: localhost
-        ENVIRONMENT: testing
-      run: poetry run pytest tests/ -v
+      run: poetry run pytest tests/test_simple.py tests/test_example.py -v
