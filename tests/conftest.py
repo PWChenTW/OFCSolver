@@ -59,10 +59,10 @@ def test_client():
     """Test HTTP client."""
     from fastapi.testclient import TestClient
     from fastapi import FastAPI
-    
+
     # Create a minimal test app to avoid initialization issues
     app = FastAPI()
-    
+
     @app.get("/health/")
     async def health():
         return {
@@ -74,18 +74,21 @@ def test_client():
                 "database": {"status": "healthy"},
                 "redis": {"status": "healthy"},
                 "solver": {"status": "healthy"},
-                "external_services": {"status": "healthy"}
-            }
+                "external_services": {"status": "healthy"},
+            },
         }
-    
+
     @app.get("/health/liveness")
     async def liveness():
         return {"status": "alive", "timestamp": "2024-01-01T00:00:00"}
-    
+
     @app.get("/health/readiness")
     async def readiness():
-        return {"status": "ready", "critical_checks": {"database": "healthy", "redis": "healthy"}}
-    
+        return {
+            "status": "ready",
+            "critical_checks": {"database": "healthy", "redis": "healthy"},
+        }
+
     @app.get("/health/metrics")
     async def metrics():
         return {
@@ -95,9 +98,9 @@ def test_client():
             "metrics": {
                 "total_requests": 0,
                 "active_connections": 0,
-                "cache_hit_rate": 0.0
-            }
+                "cache_hit_rate": 0.0,
+            },
         }
-    
+
     with TestClient(app) as client:
         yield client
