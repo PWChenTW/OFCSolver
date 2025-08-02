@@ -4,7 +4,6 @@ Handles strategy calculation, position analysis, and solver operations.
 """
 
 from typing import List, Optional
-from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel, Field

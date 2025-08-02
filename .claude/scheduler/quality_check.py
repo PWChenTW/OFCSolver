@@ -12,6 +12,7 @@ import sys
 from datetime import datetime
 
 
+
 class QualityChecker:
     def __init__(self):
         self.warnings = []
@@ -111,7 +112,9 @@ class QualityChecker:
             )
 
             if not has_error_handling:
-                self.warnings.append(f"🔧 品質提醒: {filepath} 有外部調用但缺少錯誤處理")
+                self.warnings.append(
+                    f"🔧 品質提醒: {filepath} 有外部調用但缺少錯誤處理"
+                )
 
     def _check_code_quality(self, filepath, content):
         """檢查代碼品質"""
@@ -153,7 +156,9 @@ class QualityChecker:
 
         # 檢查是否有var（建議使用let/const）
         if re.search(r"\bvar\s+\w+", content):
-            self.warnings.append(f"💡 建議: {filepath} 使用var聲明變量，建議使用let/const")
+            self.warnings.append(
+                f"💡 建議: {filepath} 使用var聲明變量，建議使用let/const"
+            )
 
     def _check_go_quality(self, filepath, content):
         """檢查Go代碼品質"""
@@ -183,7 +188,9 @@ class QualityChecker:
 
                     if not has_docstring:
                         func_name = re.search(r"def\s+(\w+)", lines[func_line]).group(1)
-                        self.warnings.append(f"📚 建議: {filepath} 函數 {func_name} 缺少文檔字符串")
+                        self.warnings.append(
+                            f"📚 建議: {filepath} 函數 {func_name} 缺少文檔字符串"
+                        )
 
     def check_git_changes(self):
         """檢查Git變更中的品質問題"""

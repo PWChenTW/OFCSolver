@@ -5,13 +5,15 @@ Health check endpoints and system status monitoring.
 import asyncio
 import time
 from datetime import datetime
-from typing import Any, Dict
+from typing import Dict, Any
+import psutil
+import os
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-# from src.infrastructure.persistence.postgresql.database import get_database
-# from src.infrastructure.persistence.redis.cache_service import get_redis_client
+from src.infrastructure.database.connection_pool import connection_pool
+from src.infrastructure.database.session import db_session
 
 router = APIRouter()
 
@@ -43,12 +45,13 @@ async def check_database_health() -> ServiceCheck:
     start_time = time.time()
 
     try:
-        # TODO: Implement actual database check
-        # db = await get_database()
-        # result = await db.execute("SELECT 1")
+        # Check PostgreSQL connection
+        async with db_session.get_session() as session:
+            result = await session.execute("SELECT 1")
+            await result.fetchone()
 
-        # Simulate database check
-        await asyncio.sleep(0.01)  # Simulate small delay
+        # Get connection pool stats
+        pool_stats = await connection_pool.get_postgres_stats()
 
         response_time_ms = (time.time() - start_time) * 1000
 
@@ -56,8 +59,9 @@ async def check_database_health() -> ServiceCheck:
             status="healthy",
             response_time_ms=response_time_ms,
             details={
-                "connection_pool_size": 10,
-                "active_connections": 5,
+                "connection_pool_size": pool_stats.get("size", 0),
+                "active_connections": pool_stats.get("checked_out", 0),
+                "available_connections": pool_stats.get("checked_in", 0),
                 "query_test": "passed",
             },
         )
@@ -75,22 +79,24 @@ async def check_redis_health() -> ServiceCheck:
     start_time = time.time()
 
     try:
-        # TODO: Implement actual Redis check
-        # redis_client = await get_redis_client()
-        # await redis_client.ping()
+        # Check Redis connection
+        redis_client = connection_pool.redis
+        ping_result = await redis_client.ping()
 
-        # Simulate Redis check
-        await asyncio.sleep(0.005)  # Simulate small delay
+        # Get Redis stats
+        redis_stats = await connection_pool.get_redis_stats()
 
         response_time_ms = (time.time() - start_time) * 1000
 
         return ServiceCheck(
-            status="healthy",
+            status="healthy" if ping_result else "unhealthy",
             response_time_ms=response_time_ms,
             details={
-                "memory_usage": "45MB",
-                "connected_clients": 8,
-                "ping_test": "passed",
+                "ping_test": "passed" if ping_result else "failed",
+                "created_connections": redis_stats.get("created_connections", 0),
+                "available_connections": redis_stats.get("available_connections", 0),
+                "in_use_connections": redis_stats.get("in_use_connections", 0),
+                "max_connections": redis_stats.get("max_connections", 0),
             },
         )
     except Exception as e:
@@ -140,18 +146,26 @@ async def check_external_services_health() -> ServiceCheck:
     start_time = time.time()
 
     try:
-        # TODO: Check RabbitMQ, ClickHouse, etc.
-        await asyncio.sleep(0.02)  # Simulate external service checks
+        # Check ClickHouse if available
+        clickhouse_status = "not_configured"
+        if connection_pool.clickhouse:
+            clickhouse_healthy = await connection_pool.clickhouse.ping()
+            clickhouse_status = "connected" if clickhouse_healthy else "disconnected"
+
+        # Get all connection health status
+        health_status = await connection_pool.health_check()
 
         response_time_ms = (time.time() - start_time) * 1000
 
         return ServiceCheck(
-            status="healthy",
+            status="healthy" if all(health_status.values()) else "degraded",
             response_time_ms=response_time_ms,
             details={
-                "rabbitmq": "connected",
-                "clickhouse": "connected",
-                "prometheus": "collecting_metrics",
+                "postgres": (
+                    "connected" if health_status.get("postgres") else "disconnected"
+                ),
+                "redis": "connected" if health_status.get("redis") else "disconnected",
+                "clickhouse": clickhouse_status,
             },
         )
     except Exception as e:
@@ -266,16 +280,38 @@ async def get_basic_metrics() -> Dict[str, Any]:
     """
     uptime_seconds = time.time() - _start_time
 
+    # Get system metrics
+    process = psutil.Process(os.getpid())
+    memory_info = process.memory_info()
+    cpu_percent = process.cpu_percent(interval=0.1)
+
+    # Get connection pool stats
+    postgres_stats = await connection_pool.get_postgres_stats()
+    redis_stats = await connection_pool.get_redis_stats()
+
     return {
         "uptime_seconds": uptime_seconds,
         "timestamp": datetime.utcnow().isoformat(),
         "version": "0.1.0",
+        "system": {
+            "memory_usage_mb": memory_info.rss / 1024 / 1024,
+            "cpu_percent": cpu_percent,
+            "num_threads": process.num_threads(),
+        },
+        "database": {
+            "pool_size": postgres_stats.get("size", 0),
+            "active_connections": postgres_stats.get("checked_out", 0),
+            "available_connections": postgres_stats.get("checked_in", 0),
+        },
+        "cache": {
+            "created_connections": redis_stats.get("created_connections", 0),
+            "available_connections": redis_stats.get("available_connections", 0),
+            "in_use_connections": redis_stats.get("in_use_connections", 0),
+        },
         "metrics": {
             "total_requests": 0,  # TODO: Implement request counter
-            "active_connections": 0,  # TODO: Get from connection pool
             "cache_hit_rate": 0.0,  # TODO: Get from cache service
             "avg_response_time_ms": 0.0,  # TODO: Implement response time tracking
             "solver_calculations_total": 0,  # TODO: Get from solver service
-            "memory_usage_mb": 0,  # TODO: Get current memory usage
         },
     }

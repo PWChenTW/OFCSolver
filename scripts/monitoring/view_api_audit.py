@@ -12,6 +12,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 
 
+
 class APIAuditViewer:
     def __init__(self, log_file=".api_audit.log"):
         self.log_file = log_file
@@ -183,7 +184,9 @@ def main():
     parser.add_argument("--hours", type=int, default=24, help="分析最近N小時的數據")
     parser.add_argument("--summary", action="store_true", help="顯示總體摘要")
     parser.add_argument("--export", metavar="FILE", help="導出詳細報告到JSON文件")
-    parser.add_argument("--test", action="store_true", help="測試模式（不讀取真實日誌）")
+    parser.add_argument(
+        "--test", action="store_true", help="測試模式（不讀取真實日誌）"
+    )
 
     args = parser.parse_args()
 

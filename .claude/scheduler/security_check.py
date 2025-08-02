@@ -12,6 +12,7 @@ import sys
 from datetime import datetime
 
 
+
 class SecurityChecker:
     def __init__(self):
         self.warnings = []
@@ -102,7 +103,9 @@ class SecurityChecker:
             )
 
             if not has_security:
-                self.warnings.append(f"⚠️ 安全提醒: {filepath} 包含認證邏輯但可能缺少安全措施")
+                self.warnings.append(
+                    f"⚠️ 安全提醒: {filepath} 包含認證邏輯但可能缺少安全措施"
+                )
 
     def _check_input_validation(self, filepath, content):
         """檢查輸入驗證"""
@@ -138,7 +141,9 @@ class SecurityChecker:
             )
 
             if not has_validation:
-                self.warnings.append(f"🛡️ 安全提醒: {filepath} 處理用戶輸入但可能缺少驗證")
+                self.warnings.append(
+                    f"🛡️ 安全提醒: {filepath} 處理用戶輸入但可能缺少驗證"
+                )
 
     def _check_error_handling(self, filepath, content):
         """檢查錯誤處理"""
@@ -176,7 +181,9 @@ class SecurityChecker:
             )
 
             if not has_error_handling:
-                self.warnings.append(f"🔧 品質提醒: {filepath} 有外部調用但可能缺少錯誤處理")
+                self.warnings.append(
+                    f"🔧 品質提醒: {filepath} 有外部調用但可能缺少錯誤處理"
+                )
 
     def _check_encryption(self, filepath, content):
         """檢查加密相關"""
@@ -211,7 +218,9 @@ class SecurityChecker:
             )
 
             if not has_encryption:
-                self.warnings.append(f"🔐 安全提醒: {filepath} 處理敏感數據但可能缺少加密保護")
+                self.warnings.append(
+                    f"🔐 安全提醒: {filepath} 處理敏感數據但可能缺少加密保護"
+                )
 
     def check_git_changes(self):
         """檢查Git變更中的安全問題"""

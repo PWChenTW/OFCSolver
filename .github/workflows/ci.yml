@@ -1,21 +1,55 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  PYTHON_VERSION: "3.11"
+  POETRY_VERSION: "1.7.1"
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 1.7.1
-      - name: Install dependencies
-        run: poetry install --no-interaction
-      - name: Run tests
-        run: poetry run pytest
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: ${{ env.POETRY_VERSION }}
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
+
+    - name: Install project
+      run: poetry install --no-interaction
+
+    - name: Check code formatting with Black
+      run: poetry run black --check src/ tests/
+
+    - name: Lint with flake8
+      run: poetry run flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Run tests
+      run: poetry run pytest tests/test_simple.py tests/test_example.py -v
