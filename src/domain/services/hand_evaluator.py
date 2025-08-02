@@ -5,33 +5,11 @@ Service for evaluating poker hand rankings and strengths
 according to OFC rules and royalty calculations.
 """
 
-from enum import Enum
 from typing import List, Tuple
 
 from ..base import DomainService
 from ..value_objects import Card, HandRanking
-
-
-class HandType(Enum):
-    """Poker hand types in order of strength."""
-
-    HIGH_CARD = (0, "High Card")
-    PAIR = (1, "Pair")
-    TWO_PAIR = (2, "Two Pair")
-    THREE_OF_A_KIND = (3, "Three of a Kind")
-    STRAIGHT = (4, "Straight")
-    FLUSH = (5, "Flush")
-    FULL_HOUSE = (6, "Full House")
-    FOUR_OF_A_KIND = (7, "Four of a Kind")
-    STRAIGHT_FLUSH = (8, "Straight Flush")
-    ROYAL_FLUSH = (9, "Royal Flush")
-
-    def __init__(self, value: int, display_name: str):
-        self.value = value
-        self.display_name = display_name
-
-    def __lt__(self, other: "HandType") -> bool:
-        return self.value < other.value
+from ..value_objects.hand_ranking import HandType
 
 
 class HandEvaluator(DomainService):
@@ -87,20 +65,7 @@ class HandEvaluator(DomainService):
         Returns:
             1 if hand1 wins, -1 if hand2 wins, 0 if tie
         """
-        # Compare hand types first
-        if hand1.hand_type.value != hand2.hand_type.value:
-            return 1 if hand1.hand_type.value > hand2.hand_type.value else -1
-
-        # Compare strength values for same hand type
-        if hand1.strength_value != hand2.strength_value:
-            return 1 if hand1.strength_value > hand2.strength_value else -1
-
-        # Compare kickers
-        for k1, k2 in zip(hand1.kickers, hand2.kickers):
-            if k1 != k2:
-                return 1 if k1 > k2 else -1
-
-        return 0  # Tie
+        return hand1.compare_to(hand2)
 
     def validate_ofc_progression(
         self, top_cards: List[Card], middle_cards: List[Card], bottom_cards: List[Card]
@@ -138,8 +103,8 @@ class HandEvaluator(DomainService):
             Tuple of (hand_type, strength_value, kickers)
         """
         # Sort cards by rank (descending)
-        sorted_cards = sorted(cards, key=lambda c: c.rank.value, reverse=True)
-        ranks = [card.rank.value for card in sorted_cards]
+        sorted_cards = sorted(cards, key=lambda c: c.rank.numeric_value, reverse=True)
+        ranks = [card.rank.numeric_value for card in sorted_cards]
         suits = [card.suit for card in sorted_cards]
 
         # Count rank frequencies
@@ -252,7 +217,7 @@ class HandEvaluator(DomainService):
             return 10
         elif hand_type == HandType.PAIR:
             pair_rank = max(
-                card.rank.value
+                card.rank.numeric_value
                 for card in cards
                 if sum(1 for c in cards if c.rank == card.rank) == 2
             )

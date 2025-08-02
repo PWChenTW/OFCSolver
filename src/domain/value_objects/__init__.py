@@ -22,10 +22,10 @@ from .difficulty import Difficulty
 from .expected_value import ExpectedValue
 from .feedback import Feedback
 from .game_rules import GameRules
-from .hand import Hand
+from .hand import Hand, HandValidationError, InvalidCardPlacementError
 
 # Performance and analysis value objects
-from .hand_ranking import HandRanking
+from .hand_ranking import HandRanking, HandType
 from .move import Move
 from .performance import Performance
 from .probability import Probability
@@ -40,6 +40,8 @@ __all__ = [
     "Suit",
     "Rank",
     "Hand",
+    "HandValidationError", 
+    "InvalidCardPlacementError",
     "Deck",
     "GameRules",
     "CardPosition",
@@ -52,6 +54,7 @@ __all__ = [
     "ConfidenceInterval",
     # Analysis value objects
     "HandRanking",
+    "HandType",
     "Difficulty",
     "Performance",
     "Feedback",
