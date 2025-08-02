@@ -9,7 +9,7 @@ from typing import Dict, Any
 import psutil
 import os
 
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 from src.infrastructure.database.connection_pool import connection_pool

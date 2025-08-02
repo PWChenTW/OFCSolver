@@ -28,6 +28,11 @@ from src.infrastructure.database.connection_pool import connection_pool
 from src.infrastructure.database.session import db_session
 
 # Configure logging
+import os
+
+# Create logs directory if it doesn't exist
+os.makedirs("logs", exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

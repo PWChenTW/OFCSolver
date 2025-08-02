@@ -179,6 +179,12 @@ exclude_lines = [
     "@(abc\\.)?abstractmethod",
 ]
 
+# flake8 configuration
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [".git", "__pycache__", ".venv", "build", "dist", ".eggs"]
+
 # Bandit security configuration
 [tool.bandit]
 exclude_dirs = ["tests", "migrations"]

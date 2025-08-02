@@ -4,12 +4,13 @@
 在Claude Code完成響應後自動檢查代碼品質問題
 """
 
-import os
-import sys
-import re
 import glob
-from datetime import datetime
 import json
+import os
+import re
+import sys
+from datetime import datetime
+
 
 
 class QualityChecker:
@@ -241,7 +242,9 @@ class QualityChecker:
                 "quality_level": (
                     "POOR"
                     if self.errors
-                    else "NEEDS_IMPROVEMENT" if self.warnings else "GOOD"
+                    else "NEEDS_IMPROVEMENT"
+                    if self.warnings
+                    else "GOOD"
                 ),
             },
         }

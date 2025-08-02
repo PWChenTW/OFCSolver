@@ -5,7 +5,7 @@ Handles strategy calculation, position analysis, and solver operations.
 
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 # from src.application.commands.analysis_commands import CalculateStrategyCommand
