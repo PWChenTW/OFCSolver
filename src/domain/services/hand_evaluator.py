@@ -175,8 +175,11 @@ class HandEvaluator(DomainService):
             kicker = count_groups[1][0]
             return HandType.FOUR_OF_A_KIND, quad_rank, [kicker]
 
-        elif (count_groups[0][1] == 3 and len(count_groups) > 1 and
-              count_groups[1][1] == 2):  # Full house
+        elif (
+            count_groups[0][1] == 3
+            and len(count_groups) > 1
+            and count_groups[1][1] == 2
+        ):  # Full house
             trips_rank = count_groups[0][0]
             pair_rank = count_groups[1][0]
             return HandType.FULL_HOUSE, trips_rank, [pair_rank]
@@ -192,8 +195,11 @@ class HandEvaluator(DomainService):
             kickers = [rank for rank, count in count_groups[1:]]
             return HandType.THREE_OF_A_KIND, trips_rank, kickers
 
-        elif (count_groups[0][1] == 2 and len(count_groups) > 1 and
-              count_groups[1][1] == 2):  # Two pair
+        elif (
+            count_groups[0][1] == 2
+            and len(count_groups) > 1
+            and count_groups[1][1] == 2
+        ):  # Two pair
             high_pair = max(count_groups[0][0], count_groups[1][0])
             low_pair = min(count_groups[0][0], count_groups[1][0])
             kicker = count_groups[2][0] if len(count_groups) > 2 else 0
@@ -250,10 +256,8 @@ class HandEvaluator(DomainService):
 
         Cards are sorted to ensure same hands produce same keys.
         """
-        sorted_cards = sorted(
-            cards, key=lambda c: (c.rank.numeric_value, c.suit.value)
-        )
-        return ''.join(str(card) for card in sorted_cards)
+        sorted_cards = sorted(cards, key=lambda c: (c.rank.numeric_value, c.suit.value))
+        return "".join(str(card) for card in sorted_cards)
 
     def clear_cache(self) -> None:
         """Clear the evaluation cache."""
