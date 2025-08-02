@@ -39,20 +39,21 @@ async def test_redis() -> AsyncGenerator[None, None]:
 @pytest.fixture
 def test_settings():
     """Test application settings."""
-    from src.config import Settings
-
-    return Settings(
-        environment="testing",
-        debug=True,
-        database={
-            "host": "localhost",
-            "port": 5432,
-            "name": "ofc_solver_test",
-            "user": "postgres",
-            "password": "postgres",
-        },
-        redis={"host": "localhost", "port": 6379, "database": 1},
-    )
+    # Mock settings to avoid importing from src during test collection
+    class MockSettings:
+        def __init__(self):
+            self.environment = "testing"
+            self.debug = True
+            self.database = {
+                "host": "localhost",
+                "port": 5432,
+                "name": "ofc_solver_test",
+                "user": "postgres",
+                "password": "postgres",
+            }
+            self.redis = {"host": "localhost", "port": 6379, "database": 1}
+    
+    return MockSettings()
 
 
 @pytest.fixture
