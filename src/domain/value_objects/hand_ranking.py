@@ -34,6 +34,9 @@ class HandType:
     def __eq__(self, other: "HandType") -> bool:
         return self.value == other.value
 
+    def __hash__(self) -> int:
+        return hash(self.value)
+
     def __str__(self) -> str:
         return self.display_name
 

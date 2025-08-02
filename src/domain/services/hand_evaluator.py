@@ -172,8 +172,8 @@ class HandEvaluator(DomainService):
 
         elif count_groups[0][1] == 4:  # Four of a kind
             quad_rank = count_groups[0][0]
-            kicker = count_groups[1][0]
-            return HandType.FOUR_OF_A_KIND, quad_rank, [kicker]
+            kicker = count_groups[1][0] if len(count_groups) > 1 else 0
+            return HandType.FOUR_OF_A_KIND, quad_rank, [kicker] if kicker else []
 
         elif (
             count_groups[0][1] == 3

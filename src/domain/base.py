@@ -47,7 +47,7 @@ class ValueObject(ABC):
         return f"{self.__class__.__name__}({attrs})"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class DomainEvent:
     """
     Base class for domain events.
@@ -59,8 +59,8 @@ class DomainEvent:
 
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     occurred_at: datetime = field(default_factory=datetime.utcnow)
-    event_version: int = field(default=1)
-    aggregate_id: Optional[str] = field(default=None)
+    event_version: int = 1
+    aggregate_id: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary for serialization."""
@@ -137,21 +137,18 @@ class AggregateRoot(DomainEntity):
 
     def __init__(self, entity_id: EntityId):
         super().__init__(entity_id)
-        self._domain_events: List[DomainEvent] = []
+        self._domain_events: List[Any] = []
 
-    def add_domain_event(self, event: DomainEvent) -> None:
+    def add_domain_event(self, event: Any) -> None:
         """Add a domain event to the aggregate."""
         # Set aggregate ID if not already set
-        if event.aggregate_id is None:
-            # Create a copy of the event with the aggregate ID
-            event_dict = event.__dict__.copy()
-            event_dict["aggregate_id"] = str(self._id)
-            # Create new event instance with updated aggregate_id
-            event = event.__class__(**event_dict)
+        if hasattr(event, "aggregate_id") and event.aggregate_id is None:
+            # For frozen dataclasses, use object.__setattr__
+            object.__setattr__(event, "aggregate_id", str(self._id))
 
         self._domain_events.append(event)
 
-    def get_domain_events(self) -> List[DomainEvent]:
+    def get_domain_events(self) -> List[Any]:
         """Get all domain events from the aggregate."""
         return deepcopy(self._domain_events)
 
