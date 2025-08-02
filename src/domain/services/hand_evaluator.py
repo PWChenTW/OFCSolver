@@ -5,33 +5,12 @@ Service for evaluating poker hand rankings and strengths
 according to OFC rules and royalty calculations.
 """
 
-from enum import Enum
-from typing import List, Tuple
+from typing import Dict, List, Tuple
+from functools import lru_cache
 
 from ..base import DomainService
 from ..value_objects import Card, HandRanking
-
-
-class HandType(Enum):
-    """Poker hand types in order of strength."""
-
-    HIGH_CARD = (0, "High Card")
-    PAIR = (1, "Pair")
-    TWO_PAIR = (2, "Two Pair")
-    THREE_OF_A_KIND = (3, "Three of a Kind")
-    STRAIGHT = (4, "Straight")
-    FLUSH = (5, "Flush")
-    FULL_HOUSE = (6, "Full House")
-    FOUR_OF_A_KIND = (7, "Four of a Kind")
-    STRAIGHT_FLUSH = (8, "Straight Flush")
-    ROYAL_FLUSH = (9, "Royal Flush")
-
-    def __init__(self, value: int, display_name: str):
-        self.value = value
-        self.display_name = display_name
-
-    def __lt__(self, other: "HandType") -> bool:
-        return self.value < other.value
+from ..value_objects.hand_ranking import HandType
 
 
 class HandEvaluator(DomainService):
@@ -44,7 +23,7 @@ class HandEvaluator(DomainService):
 
     def __init__(self):
         """Initialize hand evaluator."""
-        pass
+        self._evaluation_cache: Dict[str, HandRanking] = {}
 
     def evaluate_hand(self, cards: List[Card]) -> HandRanking:
         """
@@ -62,19 +41,39 @@ class HandEvaluator(DomainService):
         if len(cards) < 3 or len(cards) > 5:
             raise ValueError(f"Hand must have 3-5 cards, got {len(cards)}")
 
+        # Create cache key from sorted cards
+        cache_key = self._create_cache_key(cards)
+
+        # Check cache first
+        if cache_key in self._evaluation_cache:
+            cached_result = self._evaluation_cache[cache_key]
+            # Return a copy with the original card order
+            return HandRanking(
+                hand_type=cached_result.hand_type,
+                strength_value=cached_result.strength_value,
+                kickers=cached_result.kickers,
+                royalty_bonus=cached_result.royalty_bonus,
+                cards=cards.copy(),
+            )
+
         # Determine hand type and strength
         hand_type, strength_value, kickers = self._analyze_hand(cards)
 
         # Calculate royalty bonus
         royalty_bonus = self._calculate_royalty_bonus(cards, hand_type)
 
-        return HandRanking(
+        result = HandRanking(
             hand_type=hand_type,
             strength_value=strength_value,
             kickers=kickers,
             royalty_bonus=royalty_bonus,
             cards=cards.copy(),
         )
+
+        # Cache the result
+        self._evaluation_cache[cache_key] = result
+
+        return result
 
     def compare_hands(self, hand1: HandRanking, hand2: HandRanking) -> int:
         """
@@ -87,20 +86,7 @@ class HandEvaluator(DomainService):
         Returns:
             1 if hand1 wins, -1 if hand2 wins, 0 if tie
         """
-        # Compare hand types first
-        if hand1.hand_type.value != hand2.hand_type.value:
-            return 1 if hand1.hand_type.value > hand2.hand_type.value else -1
-
-        # Compare strength values for same hand type
-        if hand1.strength_value != hand2.strength_value:
-            return 1 if hand1.strength_value > hand2.strength_value else -1
-
-        # Compare kickers
-        for k1, k2 in zip(hand1.kickers, hand2.kickers):
-            if k1 != k2:
-                return 1 if k1 > k2 else -1
-
-        return 0  # Tie
+        return hand1.compare_to(hand2)
 
     def validate_ofc_progression(
         self, top_cards: List[Card], middle_cards: List[Card], bottom_cards: List[Card]
@@ -124,11 +110,30 @@ class HandEvaluator(DomainService):
         middle_hand = self.evaluate_hand(middle_cards)
         bottom_hand = self.evaluate_hand(bottom_cards)
 
-        # Check progression: bottom > middle > top
+        # Check progression: bottom > middle > top (strict ordering, no equal hands)
         bottom_beats_middle = self.compare_hands(bottom_hand, middle_hand) > 0
         middle_beats_top = self.compare_hands(middle_hand, top_hand) > 0
 
         return bottom_beats_middle and middle_beats_top
+
+    def is_fouled_hand(
+        self, top_cards: List[Card], middle_cards: List[Card], bottom_cards: List[Card]
+    ) -> bool:
+        """
+        Check if an OFC hand is fouled.
+
+        A hand is fouled if the rows don't follow proper strength progression:
+        bottom > middle > top.
+
+        Args:
+            top_cards: Top row cards (3 cards)
+            middle_cards: Middle row cards (5 cards)
+            bottom_cards: Bottom row cards (5 cards)
+
+        Returns:
+            True if hand is fouled, False if valid
+        """
+        return not self.validate_ofc_progression(top_cards, middle_cards, bottom_cards)
 
     def _analyze_hand(self, cards: List[Card]) -> Tuple[HandType, int, List[int]]:
         """
@@ -138,8 +143,8 @@ class HandEvaluator(DomainService):
             Tuple of (hand_type, strength_value, kickers)
         """
         # Sort cards by rank (descending)
-        sorted_cards = sorted(cards, key=lambda c: c.rank.value, reverse=True)
-        ranks = [card.rank.value for card in sorted_cards]
+        sorted_cards = sorted(cards, key=lambda c: c.rank.numeric_value, reverse=True)
+        ranks = [card.rank.numeric_value for card in sorted_cards]
         suits = [card.suit for card in sorted_cards]
 
         # Count rank frequencies
@@ -170,7 +175,11 @@ class HandEvaluator(DomainService):
             kicker = count_groups[1][0]
             return HandType.FOUR_OF_A_KIND, quad_rank, [kicker]
 
-        elif count_groups[0][1] == 3 and count_groups[1][1] == 2:  # Full house
+        elif (
+            count_groups[0][1] == 3
+            and len(count_groups) > 1
+            and count_groups[1][1] == 2
+        ):  # Full house
             trips_rank = count_groups[0][0]
             pair_rank = count_groups[1][0]
             return HandType.FULL_HOUSE, trips_rank, [pair_rank]
@@ -186,11 +195,16 @@ class HandEvaluator(DomainService):
             kickers = [rank for rank, count in count_groups[1:]]
             return HandType.THREE_OF_A_KIND, trips_rank, kickers
 
-        elif count_groups[0][1] == 2 and count_groups[1][1] == 2:  # Two pair
+        elif (
+            count_groups[0][1] == 2
+            and len(count_groups) > 1
+            and count_groups[1][1] == 2
+        ):  # Two pair
             high_pair = max(count_groups[0][0], count_groups[1][0])
             low_pair = min(count_groups[0][0], count_groups[1][0])
-            kicker = count_groups[2][0]
-            return HandType.TWO_PAIR, high_pair, [low_pair, kicker]
+            kicker = count_groups[2][0] if len(count_groups) > 2 else 0
+            kickers = [low_pair, kicker] if kicker else [low_pair]
+            return HandType.TWO_PAIR, high_pair, kickers
 
         elif count_groups[0][1] == 2:  # Pair
             pair_rank = count_groups[0][0]
@@ -200,18 +214,20 @@ class HandEvaluator(DomainService):
         else:  # High card
             return HandType.HIGH_CARD, ranks[0], ranks[1:]
 
-    def _check_straight(self, ranks: List[int]) -> Tuple[bool, int]:
+    @staticmethod
+    @lru_cache(maxsize=1024)
+    def _check_straight_cached(ranks_tuple: Tuple[int, ...]) -> Tuple[bool, int]:
         """
-        Check if ranks form a straight.
+        Check if ranks form a straight (cached version).
 
         Returns:
             Tuple of (is_straight, high_card_rank)
         """
-        if len(ranks) != 5:
+        if len(ranks_tuple) != 5:
             return False, 0
 
         # Sort ranks
-        sorted_ranks = sorted(set(ranks))
+        sorted_ranks = sorted(set(ranks_tuple))
 
         # Check for regular straight
         if len(sorted_ranks) == 5:
@@ -223,6 +239,29 @@ class HandEvaluator(DomainService):
             return True, 5  # 5 is high in wheel
 
         return False, 0
+
+    def _check_straight(self, ranks: List[int]) -> Tuple[bool, int]:
+        """
+        Check if ranks form a straight.
+
+        Returns:
+            Tuple of (is_straight, high_card_rank)
+        """
+        # Convert to tuple for caching
+        return self._check_straight_cached(tuple(ranks))
+
+    def _create_cache_key(self, cards: List[Card]) -> str:
+        """
+        Create a cache key from cards.
+
+        Cards are sorted to ensure same hands produce same keys.
+        """
+        sorted_cards = sorted(cards, key=lambda c: (c.rank.numeric_value, c.suit.value))
+        return "".join(str(card) for card in sorted_cards)
+
+    def clear_cache(self) -> None:
+        """Clear the evaluation cache."""
+        self._evaluation_cache.clear()
 
     def _calculate_royalty_bonus(self, cards: List[Card], hand_type: HandType) -> int:
         """
@@ -252,7 +291,7 @@ class HandEvaluator(DomainService):
             return 10
         elif hand_type == HandType.PAIR:
             pair_rank = max(
-                card.rank.value
+                card.rank.numeric_value
                 for card in cards
                 if sum(1 for c in cards if c.rank == card.rank) == 2
             )
@@ -266,11 +305,11 @@ class HandEvaluator(DomainService):
     ) -> int:
         """Calculate middle/bottom row (5-card) royalty bonuses."""
         royalty_table = {
-            HandType.STRAIGHT: 2,
-            HandType.FLUSH: 4,
-            HandType.FULL_HOUSE: 6,
-            HandType.FOUR_OF_A_KIND: 10,
-            HandType.STRAIGHT_FLUSH: 15,
-            HandType.ROYAL_FLUSH: 25,
+            HandType.STRAIGHT.value: 2,
+            HandType.FLUSH.value: 4,
+            HandType.FULL_HOUSE.value: 6,
+            HandType.FOUR_OF_A_KIND.value: 10,
+            HandType.STRAIGHT_FLUSH.value: 15,
+            HandType.ROYAL_FLUSH.value: 25,
         }
-        return royalty_table.get(hand_type, 0)
+        return royalty_table.get(hand_type.value, 0)
