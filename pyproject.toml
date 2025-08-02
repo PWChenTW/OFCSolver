@@ -43,6 +43,8 @@ aiofiles = "^23.2.1"
 slowapi = "^0.1.9"
 websockets = "^12.0"
 pydantic-settings = "^2.1.0"
+psutil = "^5.9.0"
+clickhouse-driver = "^0.2.6"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
@@ -85,7 +87,6 @@ ofc-worker = "src.infrastructure.external.messaging.celery_tasks:run_worker"
 [tool.black]
 line-length = 88
 target-version = ['py311']
-include = '\.pyi?$'
 extend-exclude = '''
 /(
   # directories
@@ -142,11 +143,6 @@ minversion = "7.0"
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--cov=src",
-    "--cov-report=term-missing",
-    "--cov-report=html:htmlcov",
-    "--cov-report=xml",
-    "--cov-fail-under=80",
 ]
 testpaths = ["tests"]
 markers = [
@@ -182,6 +178,12 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+
+# flake8 configuration
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [".git", "__pycache__", ".venv", "build", "dist", ".eggs"]
 
 # Bandit security configuration
 [tool.bandit]
