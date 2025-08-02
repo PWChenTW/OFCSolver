@@ -4,15 +4,17 @@ Strategy Domain Events
 Events related to strategy analysis and calculations.
 """
 
-from dataclasses import dataclass
-from typing import Optional
+import uuid
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 from ..base import DomainEvent
 from ..value_objects import Strategy
 
 
 @dataclass(frozen=True)
-class AnalysisRequestedEvent(DomainEvent):
+class AnalysisRequestedEvent:
     """Event fired when strategy analysis is requested."""
 
     session_id: str
@@ -23,7 +25,7 @@ class AnalysisRequestedEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
-class AnalysisCompletedEvent(DomainEvent):
+class AnalysisCompletedEvent:
     """Event fired when strategy analysis is completed."""
 
     session_id: str
@@ -34,7 +36,7 @@ class AnalysisCompletedEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
-class StrategyCalculatedEvent(DomainEvent):
+class StrategyCalculatedEvent:
     """Event fired when a strategy is calculated."""
 
     session_id: str
@@ -44,7 +46,7 @@ class StrategyCalculatedEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
-class CalculationStartedEvent(DomainEvent):
+class CalculationStartedEvent:
     """Event fired when a calculation starts."""
 
     calculation_id: str
@@ -54,7 +56,7 @@ class CalculationStartedEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
-class CalculationCompletedEvent(DomainEvent):
+class CalculationCompletedEvent:
     """Event fired when a calculation completes."""
 
     calculation_id: str

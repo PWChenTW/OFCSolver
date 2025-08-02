@@ -111,6 +111,17 @@ class Player(DomainEntity):
             self._hand_cards.append(card)
         self._increment_version()
 
+    def receive_fantasy_land_cards(self, cards: List[Card]) -> None:
+        """Receive all cards at once for fantasy land play."""
+        if not self._in_fantasy_land:
+            raise GameStateError(
+                "Player must be in fantasy land to receive fantasy land cards"
+            )
+
+        self._fantasy_land_cards = cards.copy()
+        self._hand_cards = cards.copy()  # All cards are available to place
+        self._increment_version()
+
     def can_place_card(self, card: Card, position: CardPosition) -> bool:
         """
         Check if card can be placed at the specified position.

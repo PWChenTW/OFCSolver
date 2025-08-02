@@ -37,7 +37,7 @@ class SessionStatus(Enum):
 
 
 @dataclass(frozen=True)
-class AnalysisRequestedEvent(DomainEvent):
+class AnalysisRequestedEvent:
     """Event fired when analysis is requested."""
 
     session_id: SessionId
@@ -47,7 +47,7 @@ class AnalysisRequestedEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
-class AnalysisCompletedEvent(DomainEvent):
+class AnalysisCompletedEvent:
     """Event fired when analysis is completed."""
 
     session_id: SessionId
@@ -57,7 +57,7 @@ class AnalysisCompletedEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
-class AnalysisFailedEvent(DomainEvent):
+class AnalysisFailedEvent:
     """Event fired when analysis fails."""
 
     session_id: SessionId

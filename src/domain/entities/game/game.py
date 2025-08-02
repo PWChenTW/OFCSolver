@@ -13,7 +13,7 @@ from ...base import AggregateRoot
 from ...events import CardPlacedEvent, GameCompletedEvent, RoundStartedEvent
 from ...exceptions import GameStateError, InvalidCardPlacementError
 from ...value_objects import Card, CardPosition, Deck, GameRules, Score
-from .player import Player, PlayerId
+from .player import Player, PlayerId, PlayerStatus
 from .position import Position
 
 GameId = str
@@ -120,9 +120,8 @@ class Game(AggregateRoot):
 
         player = self._players[player_id]
 
-        # Validate card is available
-        if not self._deck.has_card(card):
-            raise InvalidCardPlacementError(f"Card {card} is not available")
+        # Card validation is handled by player entity
+        # The player will check if they have the card
 
         # Validate placement is legal
         if not self._can_place_card(player, card, position):
@@ -132,7 +131,7 @@ class Game(AggregateRoot):
 
         # Apply placement
         player.place_card(card, position)
-        self._deck.remove_card(card)
+        # Card is already removed from deck during dealing
         self._increment_version()
 
         # Emit domain event
@@ -183,10 +182,22 @@ class Game(AggregateRoot):
 
     def _deal_initial_cards(self) -> None:
         """Deal initial cards to all players."""
-        # In OFC, each player gets 5 cards initially
+        from ...services import FantasyLandManager
+
+        fantasy_manager = FantasyLandManager()
+
         for player in self.players:
-            initial_cards = self._deck.deal_cards(5)
-            player.receive_initial_cards(initial_cards)
+            if player.is_in_fantasy_land:
+                # Fantasy land players get all cards at once
+                card_count = fantasy_manager.get_fantasy_land_card_count(
+                    self._rules.variant
+                )
+                fantasy_cards = self._deck.deal_cards(card_count)
+                player.receive_fantasy_land_cards(fantasy_cards)
+            else:
+                # Regular players get 5 cards initially
+                initial_cards = self._deck.deal_cards(5)
+                player.receive_initial_cards(initial_cards)
 
     def _start_round(self, round_number: int) -> None:
         """Start a new round."""
@@ -240,6 +251,9 @@ class Game(AggregateRoot):
         if self.is_completed:
             return
 
+        # Check for fantasy land qualification before completing
+        self._check_fantasy_land_qualification()
+
         self._completed_at = datetime.utcnow()
         self._final_scores = self.calculate_scores()
 
@@ -258,6 +272,36 @@ class Game(AggregateRoot):
         )
 
         self._increment_version()
+
+    def _check_fantasy_land_qualification(self) -> None:
+        """Check if any players qualify for fantasy land."""
+        from ...services import FantasyLandManager, HandEvaluator
+
+        fantasy_manager = FantasyLandManager()
+        evaluator = HandEvaluator()
+
+        for player in self.players:
+            if player.is_layout_complete() and not player.status == PlayerStatus.FOULED:
+                # Evaluate each row
+                top_hand = evaluator.evaluate_hand(player.top_row)
+                middle_hand = evaluator.evaluate_hand(player.middle_row)
+                bottom_hand = evaluator.evaluate_hand(player.bottom_row)
+
+                # Check qualification
+                if fantasy_manager.qualifies_for_fantasy_land(
+                    top_hand, middle_hand, bottom_hand
+                ):
+                    player.enter_fantasy_land()
+
+                # If already in fantasy land, check if they can stay
+                elif player.is_in_fantasy_land:
+                    if fantasy_manager.can_stay_in_fantasy_land(
+                        top_hand, middle_hand, bottom_hand
+                    ):
+                        # Player stays in fantasy land
+                        pass
+                    else:
+                        player.exit_fantasy_land()
 
     def __repr__(self) -> str:
         """String representation of the game."""
