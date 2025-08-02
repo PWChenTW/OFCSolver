@@ -21,6 +21,11 @@ from src.infrastructure.web.middleware.auth_middleware import AuthenticationMidd
 from src.infrastructure.web.middleware.rate_limiter import RateLimitMiddleware
 
 # Configure logging
+import os
+
+# Create logs directory if it doesn't exist
+os.makedirs("logs", exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
