@@ -329,7 +329,7 @@ class TestOFCValidation:
         # Top > Middle (fouled)
         top_cards = [Card.from_string("As"), Card.from_string("Ah"), Card.from_string("Kc")]  # Pair of Aces
         middle_cards = [Card.from_string("Ks"), Card.from_string("Qh"), Card.from_string("Jc"),
-                       Card.from_string("Td"), Card.from_string("9s")]  # King high
+                       Card.from_string("7d"), Card.from_string("3s")]  # King high (not a straight)
         bottom_cards = [Card.from_string("5s"), Card.from_string("5h"), Card.from_string("5c"),
                        Card.from_string("6d"), Card.from_string("6s")]  # Full house
         
@@ -400,6 +400,77 @@ class TestRoyaltyCalculation:
         assert royal_flush_ranking.royalty_bonus == 25
 
 
+class TestFouledHandDetection:
+    """Test fouled hand detection functionality."""
+    
+    def setup_method(self):
+        """Set up test fixtures."""
+        self.evaluator = HandEvaluator()
+    
+    def test_is_fouled_hand_method(self):
+        """Test the is_fouled_hand method."""
+        # Valid progression
+        top_cards = [Card.from_string("As"), Card.from_string("Kh"), Card.from_string("Qc")]  # A high
+        middle_cards = [Card.from_string("2s"), Card.from_string("2h"), Card.from_string("3c"),
+                       Card.from_string("3d"), Card.from_string("4s")]  # Two pair
+        bottom_cards = [Card.from_string("5s"), Card.from_string("5h"), Card.from_string("5c"),
+                       Card.from_string("6d"), Card.from_string("6s")]  # Full house
+        
+        assert not self.evaluator.is_fouled_hand(top_cards, middle_cards, bottom_cards)
+        
+        # Fouled hand
+        fouled_top = [Card.from_string("As"), Card.from_string("Ah"), Card.from_string("Kc")]  # Pair
+        fouled_middle = [Card.from_string("Ks"), Card.from_string("Qh"), Card.from_string("Jc"),
+                         Card.from_string("7d"), Card.from_string("3s")]  # K high
+        
+        assert self.evaluator.is_fouled_hand(fouled_top, fouled_middle, bottom_cards)
+
+
+class TestPerformanceOptimization:
+    """Test performance optimization features."""
+    
+    def setup_method(self):
+        """Set up test fixtures."""
+        self.evaluator = HandEvaluator()
+    
+    def test_evaluation_caching(self):
+        """Test that hand evaluations are cached."""
+        cards = [
+            Card.from_string("As"), Card.from_string("Kh"), Card.from_string("Qc"),
+            Card.from_string("Jd"), Card.from_string("Ts")
+        ]
+        
+        # First evaluation
+        result1 = self.evaluator.evaluate_hand(cards)
+        
+        # Second evaluation with same cards (should use cache)
+        result2 = self.evaluator.evaluate_hand(cards)
+        
+        # Results should be equal
+        assert result1.hand_type == result2.hand_type
+        assert result1.strength_value == result2.strength_value
+        assert result1.royalty_bonus == result2.royalty_bonus
+        
+        # Different card order should still use cache
+        shuffled_cards = [cards[2], cards[0], cards[4], cards[1], cards[3]]
+        result3 = self.evaluator.evaluate_hand(shuffled_cards)
+        
+        assert result1.hand_type == result3.hand_type
+        assert result1.strength_value == result3.strength_value
+    
+    def test_cache_clearing(self):
+        """Test cache clearing functionality."""
+        cards = [Card.from_string("As"), Card.from_string("Kh"), Card.from_string("Qc")]
+        
+        # Evaluate and cache
+        self.evaluator.evaluate_hand(cards)
+        assert len(self.evaluator._evaluation_cache) > 0
+        
+        # Clear cache
+        self.evaluator.clear_cache()
+        assert len(self.evaluator._evaluation_cache) == 0
+
+
 class TestEdgeCases:
     """Test edge cases and special scenarios."""
     
@@ -448,3 +519,46 @@ class TestEdgeCases:
         
         # Same pair (Aces), same first two kickers (K, Q), but J > T
         assert self.evaluator.compare_hands(pair1_ranking, pair2_ranking) == 1
+    
+    def test_three_card_hand_edge_cases(self):
+        """Test edge cases specific to 3-card hands."""
+        # Three different cards (high card)
+        high_card = [Card.from_string("As"), Card.from_string("Kh"), Card.from_string("2c")]
+        ranking = self.evaluator.evaluate_hand(high_card)
+        assert ranking.hand_type == HandType.HIGH_CARD
+        assert ranking.strength_value == 14
+        
+        # Three of a kind with minimum rank
+        trips_twos = [Card.from_string("2s"), Card.from_string("2h"), Card.from_string("2c")]
+        trips_ranking = self.evaluator.evaluate_hand(trips_twos)
+        assert trips_ranking.hand_type == HandType.THREE_OF_A_KIND
+        assert trips_ranking.royalty_bonus == 10  # All trips in top row get 10
+    
+    def test_duplicate_ranks_different_suits(self):
+        """Test hands with duplicate ranks but different suits."""
+        # Four cards of same rank plus one different (only possible with 5 cards)
+        four_aces = [
+            Card.from_string("As"), Card.from_string("Ah"), Card.from_string("Ac"),
+            Card.from_string("Ad"), Card.from_string("Ks")
+        ]
+        ranking = self.evaluator.evaluate_hand(four_aces)
+        assert ranking.hand_type == HandType.FOUR_OF_A_KIND
+        assert ranking.strength_value == 14
+    
+    def test_mixed_straight_and_flush_cards(self):
+        """Test hands that are almost straights or flushes."""
+        # Four cards to a straight
+        almost_straight = [
+            Card.from_string("5s"), Card.from_string("6h"), Card.from_string("7c"),
+            Card.from_string("8d"), Card.from_string("Ks")
+        ]
+        ranking = self.evaluator.evaluate_hand(almost_straight)
+        assert ranking.hand_type == HandType.HIGH_CARD
+        
+        # Four cards to a flush
+        almost_flush = [
+            Card.from_string("As"), Card.from_string("Ks"), Card.from_string("Qs"),
+            Card.from_string("Js"), Card.from_string("9h")
+        ]
+        ranking = self.evaluator.evaluate_hand(almost_flush)
+        assert ranking.hand_type == HandType.HIGH_CARD
