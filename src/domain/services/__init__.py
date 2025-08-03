@@ -32,6 +32,7 @@ from .scenario_generator import ScenarioGenerator
 
 # Strategy domain services
 from .strategy_calculator import StrategyCalculator
+from .cached_strategy_calculator import CachedStrategyCalculator
 
 __all__ = [
     # Game services
@@ -45,6 +46,7 @@ __all__ = [
     "FantasyLandManager",
     # Strategy services
     "StrategyCalculator",
+    "CachedStrategyCalculator",
     "GameTreeBuilder",
     "MonteCarloSimulator",
     "OptimalPlayFinder",
