@@ -9,7 +9,7 @@ from .distributed_cache import (
     ShardingStrategy,
     ReplicationMode,
     CacheNode,
-    ConsistentHash
+    ConsistentHash,
 )
 from .cache_monitor import CacheMonitor, MetricType, PerformanceAlert
 
@@ -29,5 +29,5 @@ __all__ = [
     "ConsistentHash",
     "CacheMonitor",
     "MetricType",
-    "PerformanceAlert"
+    "PerformanceAlert",
 ]
