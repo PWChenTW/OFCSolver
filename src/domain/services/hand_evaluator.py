@@ -256,7 +256,7 @@ class HandEvaluator(DomainService):
 
         Cards are sorted to ensure same hands produce same keys.
         """
-        sorted_cards = sorted(cards, key=lambda c: (c.rank.numeric_value, c.suit.value))
+        sorted_cards = sorted(cards, key=lambda c: (c.rank.numeric_value, ord(c.suit.value)))
         return "".join(str(card) for card in sorted_cards)
 
     def clear_cache(self) -> None:

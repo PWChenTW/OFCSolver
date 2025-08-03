@@ -18,6 +18,7 @@ from .game_validator import GameValidator
 
 # Game domain services
 from .hand_evaluator import HandEvaluator
+from .pineapple_evaluator import PineappleHandEvaluator
 from .monte_carlo_simulator import MonteCarloSimulator
 from .optimal_play_finder import OptimalPlayFinder
 from .performance_tracker import PerformanceTracker
@@ -32,6 +33,7 @@ from .strategy_calculator import StrategyCalculator
 __all__ = [
     # Game services
     "HandEvaluator",
+    "PineappleHandEvaluator",
     "GameValidator",
     "RoyaltyCalculator",
     "FantasyLandManager",

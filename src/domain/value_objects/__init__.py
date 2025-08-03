@@ -23,6 +23,8 @@ from .expected_value import ExpectedValue
 from .feedback import Feedback
 from .game_rules import GameRules
 from .hand import Hand, HandValidationError, InvalidCardPlacementError
+from .pineapple_action import PineappleAction, InitialPlacement
+from .position import Position, Row
 
 # Performance and analysis value objects
 from .hand_ranking import HandRanking, HandType
@@ -47,6 +49,10 @@ __all__ = [
     "CardPosition",
     "Move",
     "Score",
+    "PineappleAction",
+    "InitialPlacement",
+    "Position",
+    "Row",
     # Strategy value objects
     "Strategy",
     "ExpectedValue",
