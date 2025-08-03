@@ -18,8 +18,9 @@ class AnalysisRequestedEvent:
     """Event fired when strategy analysis is requested."""
 
     session_id: str
-    position_id: str
+    position: Any  # Position object
     analysis_type: str
+    timestamp: datetime
     priority: int = 0
     user_id: Optional[str] = None
 
@@ -29,10 +30,20 @@ class AnalysisCompletedEvent:
     """Event fired when strategy analysis is completed."""
 
     session_id: str
-    optimal_strategy: Strategy
+    strategy: Strategy
     calculation_time_ms: int
-    analysis_type: str
+    timestamp: datetime
+    analysis_type: str = ""
     confidence_level: Optional[float] = None
+
+
+@dataclass(frozen=True)
+class AnalysisCancelledEvent:
+    """Event fired when strategy analysis is cancelled."""
+
+    session_id: str
+    reason: Optional[str]
+    timestamp: datetime
 
 
 @dataclass(frozen=True)

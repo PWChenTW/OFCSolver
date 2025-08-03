@@ -9,6 +9,12 @@ class ValidationError(DomainError):
     pass
 
 
+class ValidationException(DomainError):
+    """General validation exception for application layer."""
+
+    pass
+
+
 class InvalidCardError(DomainError):
     """Invalid card placeholder."""
 

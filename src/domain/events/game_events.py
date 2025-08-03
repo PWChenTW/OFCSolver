@@ -14,6 +14,32 @@ from ..value_objects import Card, CardPosition, Score
 
 
 @dataclass(frozen=True)
+class GameCreatedEvent:
+    """Event fired when a game is created."""
+
+    game_id: str
+    player_ids: list[str]
+    variant: str
+    timestamp: datetime
+    event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    occurred_at: datetime = field(default_factory=datetime.utcnow)
+    event_version: int = 1
+    aggregate_id: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert event to dictionary for serialization."""
+        result = {}
+        for key, value in self.__dict__.items():
+            if isinstance(value, datetime):
+                result[key] = value.isoformat()
+            elif hasattr(value, "to_dict"):
+                result[key] = value.to_dict()
+            else:
+                result[key] = value
+        return result
+
+
+@dataclass(frozen=True)
 class GameCompletedEvent:
     """Event fired when a game is completed."""
 
@@ -21,6 +47,57 @@ class GameCompletedEvent:
     final_scores: Dict[str, Score]
     winner_id: Optional[str] = None
     game_duration_seconds: Optional[int] = None
+    event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    occurred_at: datetime = field(default_factory=datetime.utcnow)
+    event_version: int = 1
+    aggregate_id: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert event to dictionary for serialization."""
+        result = {}
+        for key, value in self.__dict__.items():
+            if isinstance(value, datetime):
+                result[key] = value.isoformat()
+            elif hasattr(value, "to_dict"):
+                result[key] = value.to_dict()
+            else:
+                result[key] = value
+        return result
+
+
+@dataclass(frozen=True)
+class RoundCompletedEvent:
+    """Event fired when a round is completed."""
+
+    game_id: str
+    round_number: int
+    scores: Dict[str, Any]
+    timestamp: datetime
+    event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    occurred_at: datetime = field(default_factory=datetime.utcnow)
+    event_version: int = 1
+    aggregate_id: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert event to dictionary for serialization."""
+        result = {}
+        for key, value in self.__dict__.items():
+            if isinstance(value, datetime):
+                result[key] = value.isoformat()
+            elif hasattr(value, "to_dict"):
+                result[key] = value.to_dict()
+            else:
+                result[key] = value
+        return result
+
+
+@dataclass(frozen=True)
+class GameForfeitedEvent:
+    """Event fired when a game is forfeited."""
+
+    game_id: str
+    player_id: str
+    timestamp: datetime
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     occurred_at: datetime = field(default_factory=datetime.utcnow)
     event_version: int = 1

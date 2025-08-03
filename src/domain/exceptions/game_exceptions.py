@@ -21,6 +21,13 @@ class GameStateError(BusinessRuleViolationError):
         super().__init__("GAME_STATE", message, context)
 
 
+class InvalidGameStateError(GameStateError):
+    """Exception for invalid game state."""
+
+    def __init__(self, message: str, game_id: Optional[str] = None):
+        super().__init__(message, game_id)
+
+
 class InvalidCardPlacementError(BusinessRuleViolationError):
     """Exception for invalid card placement attempts."""
 
