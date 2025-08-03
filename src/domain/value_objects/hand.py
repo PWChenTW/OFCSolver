@@ -80,7 +80,7 @@ class Hand(ValueObject):
         """Create hand with all cards in hand (not placed yet)."""
         if len(cards) > 13:
             raise HandValidationError(
-                f"Cannot create hand with more than 13 cards, got {len(cards)}"
+                f"Hand cannot contain more than 13 cards"
             )
 
         return cls(top_row=[], middle_row=[], bottom_row=[], hand_cards=list(cards))
@@ -160,7 +160,7 @@ class Hand(ValueObject):
 
         if not self.can_place_card(position):
             raise InvalidCardPlacementError(
-                f"Cannot place card in {position} - position full"
+                f"Cannot place card in {position}"
             )
 
         # Create new card lists

@@ -63,20 +63,20 @@ class GameValidator(DomainService):
                 error_message="Cannot place cards in completed game"
             )
         
+        # Get player first to check if they exist
+        player = self._get_player_by_id(game, player_id)
+        if not player:
+            return ValidationResult(
+                is_valid=False,
+                error_message=f"Player {player_id} not in game"
+            )
+        
         # Check if it's player's turn
         current_player = game.get_current_player()
         if player_id != current_player.id:
             return ValidationResult(
                 is_valid=False,
                 error_message=f"It's not player {player_id}'s turn"
-            )
-        
-        # Get player
-        player = self._get_player_by_id(game, player_id)
-        if not player:
-            return ValidationResult(
-                is_valid=False,
-                error_message=f"Player {player_id} not in game"
             )
         
         # Check if player has the card
