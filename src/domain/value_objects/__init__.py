@@ -27,7 +27,12 @@ from .pineapple_action import PineappleAction, InitialPlacement
 from .position import Position, Row
 from .fantasy_land_state import FantasyLandState
 from .joker_card import JokerCard, JokerHandEvaluator, identify_jokers_in_hand
-from .game_variant_config import GameVariantConfig, PINEAPPLE_STANDARD, PINEAPPLE_POKERSTARS, STANDARD_OFC
+from .game_variant_config import (
+    GameVariantConfig,
+    PINEAPPLE_STANDARD,
+    PINEAPPLE_POKERSTARS,
+    STANDARD_OFC,
+)
 from .game_tree_node import GameTreeNode, NodeAction
 
 # Performance and analysis value objects
