@@ -23,6 +23,7 @@
 3. **生成任務清單**
    - 保存到 `.kiro/specs/[feature-name]/tasks.md`
    - 更新規格狀態為 `implementation`
+   - 執行任務記錄：`python .claude/scripts/update_task_log.py`
 
 ## 任務分解原則
 
@@ -41,9 +42,15 @@
 - 關鍵路徑優先處理
 - 性能瓶頸提前驗證
 
-### 4. Sub Agent分工
-- 每個任務分配給最適合的Agent
-- 確保專業分工
+### 4. Sub Agent分工 (強制規則)
+- 每個任務**必須**分配給最適合的Agent
+- **禁止**主助手直接實作任務
+- 確保專業分工：
+  - 架構任務 → `architect`
+  - 業務邏輯 → `business-analyst`
+  - 算法實作 → `data-specialist`
+  - API開發 → `integration-specialist`
+  - 測試設計 → `test-engineer`
 - 避免重複工作
 
 ## 輸出格式

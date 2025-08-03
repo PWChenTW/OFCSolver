@@ -9,10 +9,12 @@
 
 這個命令會自動：
 
-1. **調用business-analyst**
+1. **調用business-analyst** (強制委派)
+   - **必須**委派給 `business-analyst`，禁止主助手直接分析
    - 深入分析業務需求
    - 識別關鍵使用場景
    - 評估技術可行性
+   - 應用批判性思考，質疑需求合理性
 
 2. **生成BDD文檔**
    - 創建Gherkin格式的場景
@@ -22,6 +24,7 @@
 3. **輸出需求文檔**
    - 保存到 `.kiro/specs/[feature-name]/requirements.md`
    - 更新規格狀態為 `design`
+   - 執行任務記錄：`python .claude/scripts/update_task_log.py`
 
 ## BDD需求分析流程
 

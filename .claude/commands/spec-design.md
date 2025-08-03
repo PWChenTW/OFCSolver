@@ -36,15 +36,18 @@
    - 理解業務邏輯和約束條件
    - 識別技術挑戰點
 
-2. **執行DDD設計**
+2. **執行DDD設計** (強制委派給 architect)
+   - **必須**委派給 `architect`，禁止主助手直接設計
    - 建立領域模型
    - 設計實體和值對象
    - 定義聚合邊界
    - 規劃領域服務
+   - 遵循 MVP 原則，避免過度設計
 
 3. **生成設計文檔**
    - 保存到 `.kiro/specs/[feature-name]/design.md`
    - 更新規格狀態為 `tasks`
+   - 執行任務記錄：`python .claude/scripts/update_task_log.py`
 
 ## DDD設計流程
 
