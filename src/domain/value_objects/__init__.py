@@ -25,6 +25,10 @@ from .game_rules import GameRules
 from .hand import Hand, HandValidationError, InvalidCardPlacementError
 from .pineapple_action import PineappleAction, InitialPlacement
 from .position import Position, Row
+from .fantasy_land_state import FantasyLandState
+from .joker_card import JokerCard, JokerHandEvaluator, identify_jokers_in_hand
+from .game_variant_config import GameVariantConfig, PINEAPPLE_STANDARD, PINEAPPLE_POKERSTARS, STANDARD_OFC
+from .game_tree_node import GameTreeNode, NodeAction
 
 # Performance and analysis value objects
 from .hand_ranking import HandRanking, HandType
@@ -53,6 +57,16 @@ __all__ = [
     "InitialPlacement",
     "Position",
     "Row",
+    "FantasyLandState",
+    "JokerCard",
+    "JokerHandEvaluator",
+    "identify_jokers_in_hand",
+    "GameVariantConfig",
+    "PINEAPPLE_STANDARD",
+    "PINEAPPLE_POKERSTARS",
+    "STANDARD_OFC",
+    "GameTreeNode",
+    "NodeAction",
     # Strategy value objects
     "Strategy",
     "ExpectedValue",

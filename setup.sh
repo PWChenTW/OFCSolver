@@ -7,6 +7,7 @@ echo "🚀 通用AI協作開發模板一鍵設置"
 echo "==============================="
 echo "這將設置完整的AI協作開發環境，包括："
 echo "• 規格驅動開發 (SDD) 框架"
+echo "• 上下文工程 (Context Engineering) 原則"
 echo "• 多實例協作支援"
 echo "• Sub Agents 專業分工"
 echo "• Hooks 自動化"
@@ -26,10 +27,15 @@ echo "📁 創建目錄結構..."
 mkdir -p .claude/agents
 mkdir -p .claude/commands  
 mkdir -p .claude/scheduler/logs
+mkdir -p .claude/scripts
 mkdir -p .kiro/steering
 mkdir -p .kiro/specs
+mkdir -p .kiro/logs/archive
 mkdir -p docs/quick_reference
-mkdir -p docs/examples
+mkdir -p docs/examples/code_patterns
+mkdir -p docs/examples/feature_implementations
+mkdir -p docs/examples/architectural_patterns
+mkdir -p docs/examples/testing_patterns
 mkdir -p docs/collaboration
 mkdir -p docs/checklists
 mkdir -p src/domain
@@ -80,16 +86,26 @@ EOF
 cat > .kiro/steering/methodology.md << 'EOF'
 # 開發方法論
 
+## Context Engineering (上下文工程)
+本項目採用上下文工程原則，確保功能實作前有完整的上下文
+
+### 核心原則
+- 上下文為王：全面的上下文優於巧妙的提示
+- 漸進式開發：從簡單開始，逐步增強
+- 驗證驅動：明確的成功標準和驗證關卡
+
 ## SDD (規格驅動開發)
 本項目使用SDD作為主要開發流程框架
 
 ## 階段說明
-1. **需求分析** (BDD) - 理解和定義業務需求
-2. **技術設計** (DDD) - 設計系統架構和領域模型
-3. **任務分解** - 將設計分解為具體任務
-4. **實施開發** (TDD) - 測試驅動的開發實施
+1. **上下文準備** - 生成實作藍圖和深度分析
+2. **需求分析** (BDD) - 理解和定義業務需求
+3. **技術設計** (DDD) - 設計系統架構和領域模型
+4. **任務分解** - 將設計分解為具體任務
+5. **實施開發** (TDD) - 測試驅動的開發實施
 
 ## 品質標準
+- 上下文完整性分數 > 75%
 - 代碼覆蓋率 > 80%
 - 所有函數必須有文檔
 - 核心邏輯必須有單元測試
@@ -249,6 +265,8 @@ chmod +x test_setup.sh
 chmod +x .claude/scheduler/spec_scheduler.py
 chmod +x .claude/scheduler/quality_check.py
 chmod +x .claude/scheduler/security_check.py
+chmod +x .claude/scheduler/context_validator.py
+chmod +x .claude/scripts/update_task_log.py
 chmod +x scripts/monitoring/view_command_audit.py
 
 echo "✅ 腳本權限設置完成"
@@ -300,11 +318,15 @@ echo ""
 echo "📋 下一步操作："
 echo "1. 運行 'claude-code' 啟動開發環境"
 echo "2. 使用 '/spec-init [功能名稱] [描述]' 創建第一個功能"
-echo "3. 查看 USAGE_GUIDE.md 了解詳細使用方法"
+echo "3. 使用 '/spec-generate-prp [功能名稱]' 生成實作藍圖"
+echo "4. 使用 '/spec-ultrathink [功能名稱]' 進行深度分析"
+echo "5. 查看 USAGE_GUIDE.md 了解詳細使用方法"
 echo ""
 echo "🔧 有用的命令："
 echo "• ./test_setup.sh - 檢查環境狀態"
 echo "• python .claude/scheduler/spec_scheduler.py report - 查看項目進度"
+echo "• python .claude/scheduler/context_validator.py - 驗證上下文完整性"
+echo "• python .claude/scripts/update_task_log.py - 記錄任務執行"
 echo "• python scripts/monitoring/view_command_audit.py - 查看命令統計"
 echo ""
 

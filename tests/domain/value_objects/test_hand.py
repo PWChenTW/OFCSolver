@@ -120,7 +120,7 @@ class TestHandCreation:
         ]
 
         with pytest.raises(
-            HandValidationError, match="Hand cannot contain more than 13 cards"
+            HandValidationError, match="Cannot create hand with more than 13 cards"
         ):
             Hand.from_cards(cards)
 
@@ -311,7 +311,7 @@ class TestHandCardPlacement:
         )
 
         with pytest.raises(
-            InvalidCardPlacementError, match="Cannot place card in CardPosition.TOP"
+            InvalidCardPlacementError, match="Cannot place card in top - position full"
         ):
             hand.place_card(card_to_place, CardPosition.TOP)
 
