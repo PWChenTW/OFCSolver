@@ -31,3 +31,9 @@ class InsufficientDataError(DomainError):
     """Insufficient data placeholder."""
 
     pass
+
+
+class StrategyCalculationError(DomainError):
+    """Strategy calculation error."""
+
+    pass
