@@ -1,0 +1,1 @@
+"""Application handler tests."""
