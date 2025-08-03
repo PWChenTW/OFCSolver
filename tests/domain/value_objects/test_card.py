@@ -105,17 +105,17 @@ class TestCard:
         """Test card creation with invalid parameters."""
         # Card is a frozen dataclass that accepts any values in __init__
         # but we should validate that only proper Suit and Rank enums are used
-        
+
         # Create card with invalid suit (string instead of Suit enum)
         card_invalid_suit = Card(suit="invalid", rank=Rank.ACE)
         # The card is created but the suit is not a valid Suit enum
         assert not isinstance(card_invalid_suit.suit, Suit)
-        
-        # Create card with invalid rank (string instead of Rank enum)  
+
+        # Create card with invalid rank (string instead of Rank enum)
         card_invalid_rank = Card(suit=Suit.SPADES, rank="invalid")
         # The card is created but the rank is not a valid Rank enum
         assert not isinstance(card_invalid_rank.rank, Rank)
-        
+
         # Valid card should have proper enum types
         valid_card = Card(suit=Suit.SPADES, rank=Rank.ACE)
         assert isinstance(valid_card.suit, Suit)
@@ -224,7 +224,7 @@ class TestCard:
         as_card2 = Card(suit=Suit.SPADES, rank=Rank.ACE)
         assert as_card == as_card2
         assert not (as_card != as_card2)
-        
+
         # Different cards are not equal
         assert as_card != ah_card
         assert as_card != ks_card

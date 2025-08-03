@@ -107,9 +107,11 @@ class HandRanking(ValueObject):
     def is_monster_hand(self) -> bool:
         """Check if this is a monster hand (straight, flush, or straight flush+ but not full house)."""
         # Monster hands are straights, flushes, and straight flush+, but NOT full house
-        return (self.hand_type == HandType.STRAIGHT or 
-                self.hand_type == HandType.FLUSH or
-                self.hand_type.value >= HandType.STRAIGHT_FLUSH.value)
+        return (
+            self.hand_type == HandType.STRAIGHT
+            or self.hand_type == HandType.FLUSH
+            or self.hand_type.value >= HandType.STRAIGHT_FLUSH.value
+        )
 
     @property
     def has_royalty(self) -> bool:
@@ -289,13 +291,15 @@ class HandRanking(ValueObject):
 
     def __hash__(self) -> int:
         """Hash method to allow use in sets and as dict keys."""
-        return hash((
-            self.hand_type.value,
-            self.strength_value,
-            tuple(self.kickers),
-            self.royalty_bonus,
-            tuple(str(card) for card in self.cards)
-        ))
+        return hash(
+            (
+                self.hand_type.value,
+                self.strength_value,
+                tuple(self.kickers),
+                self.royalty_bonus,
+                tuple(str(card) for card in self.cards),
+            )
+        )
 
     def __lt__(self, other: "HandRanking") -> bool:
         """Less than comparison."""

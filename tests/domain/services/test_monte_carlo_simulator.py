@@ -30,7 +30,6 @@ class TestMonteCarloSimulator:
         """Create Monte Carlo simulator."""
         return MonteCarloSimulator(hand_evaluator, basic_config)
 
-
     def test_simulator_initialization(self, hand_evaluator):
         """Test simulator can be initialized."""
         simulator = MonteCarloSimulator(hand_evaluator)
@@ -50,7 +49,6 @@ class TestMonteCarloSimulator:
         assert simulator._config.exploration_constant == 1.0
         assert simulator._config.timeout_ms == 5000
 
-
     def test_ucb1_calculation(self, simulator):
         """Test UCB1 value calculation."""
         # Create mock nodes
@@ -58,11 +56,11 @@ class TestMonteCarloSimulator:
         child_node.statistics = Mock()
         child_node.statistics.visit_count = 10
         child_node.statistics.average_value = 0.5
-        
+
         parent_visits = 100
-        
+
         ucb_value = simulator._calculate_ucb1_value(child_node, parent_visits)
-        
+
         # UCB1 should be average_value + exploration_bonus
         assert ucb_value > 0.5  # Should include exploration bonus
         assert ucb_value < 2.0  # Reasonable upper bound
@@ -75,16 +73,16 @@ class TestMonteCarloSimulator:
         child1.move_to_reach = "move1"
         child1.statistics = Mock()
         child1.statistics.visit_count = 100
-        
+
         child2 = Mock()
         child2.move_to_reach = "move2"
         child2.statistics = Mock()
         child2.statistics.visit_count = 50
-        
+
         root.children = [child1, child2]
-        
+
         best_move = simulator._select_best_move(root)
-        
+
         # Should select move with highest visit count
         assert best_move == "move1"
 
@@ -94,18 +92,18 @@ class TestMonteCarloSimulator:
         root = Mock()
         root.statistics = Mock()
         root.statistics.visit_count = 200
-        
+
         child = Mock()
         child.statistics = Mock()
         child.statistics.visit_count = 200
         root.children = [child]
-        
+
         # Should converge with enough iterations without change
         assert simulator._check_convergence(root, 500) is True
-        
+
         # Should not converge with few iterations
         assert simulator._check_convergence(root, 10) is False
-        
+
         # Should not converge if not enough visits
         root.statistics.visit_count = 5
         assert simulator._check_convergence(root, 500) is False
