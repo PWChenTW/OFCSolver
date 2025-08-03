@@ -18,7 +18,7 @@ class RequestAnalysisCommand(Command):
     priority: int = 0  # Higher priority gets processed first
     
     def __post_init__(self):
-        super().__post_init__()
+
         if self.analysis_type not in ["optimal", "monte_carlo", "heuristic"]:
             raise ValueError(f"Invalid analysis type: {self.analysis_type}")
         if self.calculation_depth < 1 or self.calculation_depth > 10:
@@ -34,7 +34,7 @@ class CancelAnalysisCommand(Command):
     reason: Optional[str] = None
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.analysis_session_id:
             raise ValueError("Analysis session ID is required")
 
@@ -45,7 +45,7 @@ class GetAnalysisStatusCommand(Command):
     analysis_session_id: UUID
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.analysis_session_id:
             raise ValueError("Analysis session ID is required")
 
@@ -59,7 +59,7 @@ class BatchAnalysisCommand(Command):
     priority: int = 0
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.positions:
             raise ValueError("At least one position is required")
         if len(self.positions) > 100:
@@ -75,7 +75,7 @@ class CompareStrategiesCommand(Command):
     strategies_to_compare: List[str]  # e.g., ["optimal", "monte_carlo", "heuristic"]
     
     def __post_init__(self):
-        super().__post_init__()
+
         if len(self.strategies_to_compare) < 2:
             raise ValueError("At least 2 strategies required for comparison")
         valid_strategies = {"optimal", "monte_carlo", "heuristic", "user_defined"}
@@ -93,7 +93,7 @@ class SaveAnalysisResultCommand(Command):
     description: Optional[str] = None
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.analysis_session_id:
             raise ValueError("Analysis session ID is required")
         if not self.name:

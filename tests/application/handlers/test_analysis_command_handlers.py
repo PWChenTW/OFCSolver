@@ -19,7 +19,7 @@ from src.application.handlers.analysis_command_handlers import (
     BatchAnalysisCommandHandler,
     CompareStrategiesCommandHandler
 )
-from src.domain.entities.strategy.analysis_session import AnalysisSession, AnalysisStatus
+from src.domain.entities.strategy.analysis_session import AnalysisSession, SessionStatus
 from src.domain.entities.game.position import Position
 from src.domain.value_objects.strategy import Strategy
 from src.domain.value_objects.expected_value import ExpectedValue
@@ -189,7 +189,7 @@ class TestCancelAnalysisCommandHandler:
         """Create mock analysis session."""
         session = Mock(spec=AnalysisSession)
         session.id = uuid4()
-        session.status = AnalysisStatus.PROCESSING
+        session.status = SessionStatus.RUNNING
         session.cancel_calculation = Mock()
         session.add_event = Mock()
         return session
@@ -259,7 +259,7 @@ class TestCancelAnalysisCommandHandler:
     ):
         """Test cancellation fails when already completed."""
         # Arrange
-        mock_analysis_session.status = AnalysisStatus.COMPLETED
+        mock_analysis_session.status = SessionStatus.COMPLETED
         command = CancelAnalysisCommand(
             analysis_session_id=mock_analysis_session.id
         )
@@ -280,7 +280,7 @@ class TestGetAnalysisStatusCommandHandler:
         """Create mock completed analysis session."""
         session = Mock(spec=AnalysisSession)
         session.id = uuid4()
-        session.status = AnalysisStatus.COMPLETED
+        session.status = SessionStatus.COMPLETED
         session.created_at = datetime.utcnow()
         session.completed_at = datetime.utcnow()
         session.analysis_type = "optimal"
@@ -333,7 +333,7 @@ class TestGetAnalysisStatusCommandHandler:
         # Arrange
         processing_session = Mock(spec=AnalysisSession)
         processing_session.id = uuid4()
-        processing_session.status = AnalysisStatus.PROCESSING
+        processing_session.status = SessionStatus.RUNNING
         processing_session.created_at = datetime.utcnow()
         processing_session.started_at = datetime.utcnow()
         processing_session.analysis_type = "monte_carlo"

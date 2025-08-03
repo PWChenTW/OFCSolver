@@ -17,7 +17,6 @@ class CreateGameCommand(Command):
     game_variant: str = "standard"  # standard, pineapple, etc.
     
     def __post_init__(self):
-        super().__post_init__()
         if len(self.player_ids) < 2:
             raise ValueError("At least 2 players required")
         if len(self.player_ids) > 4:
@@ -33,7 +32,6 @@ class PlaceCardCommand(Command):
     position: CardPosition
     
     def __post_init__(self):
-        super().__post_init__()
         if not self.game_id:
             raise ValueError("Game ID is required")
         if not self.player_id:
@@ -48,7 +46,7 @@ class StartFantasyLandCommand(Command):
     cards_to_deal: int = 14  # Standard fantasy land cards
     
     def __post_init__(self):
-        super().__post_init__()
+
         if self.cards_to_deal not in [13, 14, 15]:
             raise ValueError("Fantasy land cards must be 13, 14, or 15")
 
@@ -59,7 +57,7 @@ class CompleteRoundCommand(Command):
     game_id: UUID
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.game_id:
             raise ValueError("Game ID is required")
 
@@ -71,7 +69,7 @@ class ForfeitGameCommand(Command):
     player_id: str
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.game_id:
             raise ValueError("Game ID is required")
         if not self.player_id:
@@ -88,7 +86,7 @@ class SetFantasyLandCommand(Command):
     bottom_cards: List[Card]
     
     def __post_init__(self):
-        super().__post_init__()
+
         if len(self.top_cards) != 3:
             raise ValueError("Top row must have exactly 3 cards")
         if len(self.middle_cards) != 5:
@@ -105,7 +103,7 @@ class DiscardCardCommand(Command):
     card: Card
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.game_id:
             raise ValueError("Game ID is required")
         if not self.player_id:

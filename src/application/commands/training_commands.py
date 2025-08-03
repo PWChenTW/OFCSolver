@@ -18,7 +18,7 @@ class StartTrainingSessionCommand(Command):
     time_limit_minutes: Optional[int] = None
     
     def __post_init__(self):
-        super().__post_init__()
+
         if self.scenario_type not in ["random", "specific", "progressive"]:
             raise ValueError(f"Invalid scenario type: {self.scenario_type}")
         if self.focus_areas is None:
@@ -37,7 +37,7 @@ class SubmitTrainingMoveCommand(Command):
     time_taken_seconds: float
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.session_id:
             raise ValueError("Session ID is required")
         if not self.scenario_id:
@@ -54,7 +54,7 @@ class RequestHintCommand(Command):
     hint_level: int = 1  # 1=subtle, 2=moderate, 3=explicit
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.session_id:
             raise ValueError("Session ID is required")
         if not self.scenario_id:
@@ -70,7 +70,7 @@ class CompleteScenarioCommand(Command):
     scenario_id: UUID
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.session_id:
             raise ValueError("Session ID is required")
         if not self.scenario_id:
@@ -85,7 +85,7 @@ class AdjustDifficultyCommand(Command):
     reason: Optional[str] = None  # e.g., "too_easy", "too_hard", "user_request"
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.session_id:
             raise ValueError("Session ID is required")
 
@@ -97,7 +97,7 @@ class GenerateCustomScenarioCommand(Command):
     scenario_params: Dict[str, any]  # Flexible parameters for scenario generation
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.session_id:
             raise ValueError("Session ID is required")
         if not self.scenario_params:
@@ -112,7 +112,7 @@ class ReviewTrainingHistoryCommand(Command):
     minimum_scenarios: int = 1
     
     def __post_init__(self):
-        super().__post_init__()
+
         if self.time_period_days < 1:
             raise ValueError("Time period must be positive")
         if self.minimum_scenarios < 1:
@@ -126,6 +126,6 @@ class EndTrainingSessionCommand(Command):
     save_progress: bool = True
     
     def __post_init__(self):
-        super().__post_init__()
+
         if not self.session_id:
             raise ValueError("Session ID is required")

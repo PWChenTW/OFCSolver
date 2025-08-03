@@ -14,7 +14,7 @@ from ..commands.analysis_commands import (
     CompareStrategiesCommand,
     SaveAnalysisResultCommand
 )
-from ...domain.entities.strategy.analysis_session import AnalysisSession, AnalysisStatus
+from ...domain.entities.strategy.analysis_session import AnalysisSession, SessionStatus
 from ...domain.repositories.analysis_repository import AnalysisRepository
 from ...domain.repositories.position_repository import PositionRepository
 from ...domain.services.strategy_calculator import StrategyCalculator
@@ -204,7 +204,7 @@ class CancelAnalysisCommandHandler(CommandHandler[CommandResult]):
                 )
             
             # Check if can be cancelled
-            if session.status != AnalysisStatus.PROCESSING:
+            if session.status != SessionStatus.RUNNING:
                 return CommandResult.fail(
                     f"Cannot cancel analysis in status: {session.status}",
                     command.command_id
@@ -264,18 +264,18 @@ class GetAnalysisStatusCommandHandler(CommandHandler[CommandResult]):
                 "analysis_type": session.analysis_type
             }
             
-            if session.status == AnalysisStatus.COMPLETED:
+            if session.status == SessionStatus.COMPLETED:
                 data.update({
                     "strategy": session.result,
                     "calculation_time_ms": session.calculation_time_ms,
                     "completed_at": session.completed_at.isoformat()
                 })
-            elif session.status == AnalysisStatus.FAILED:
+            elif session.status == SessionStatus.FAILED:
                 data.update({
                     "error": session.error_message,
                     "failed_at": session.completed_at.isoformat()
                 })
-            elif session.status == AnalysisStatus.PROCESSING:
+            elif session.status == SessionStatus.RUNNING:
                 # Estimate progress
                 elapsed = (datetime.utcnow() - session.started_at).total_seconds()
                 data["progress_percentage"] = min(95, int(elapsed * 10))  # Simple estimate

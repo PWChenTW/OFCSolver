@@ -4,8 +4,14 @@ import logging
 from typing import TypeVar, Callable, Any
 from contextlib import asynccontextmanager
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from ...infrastructure.database.session import get_async_session
+try:
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from ...infrastructure.database.session import get_async_session
+    SQLALCHEMY_AVAILABLE = True
+except ImportError:
+    AsyncSession = None
+    get_async_session = None
+    SQLALCHEMY_AVAILABLE = False
 
 
 logger = logging.getLogger(__name__)
@@ -27,7 +33,7 @@ def transactional(isolation_level: str = "READ_COMMITTED"):
             session = getattr(self, '_session', None)
             owns_session = False
             
-            if session is None:
+            if session is None and SQLALCHEMY_AVAILABLE:
                 # Create new session if handler doesn't have one
                 async with get_async_session() as new_session:
                     self._session = new_session
@@ -62,7 +68,7 @@ def transactional(isolation_level: str = "READ_COMMITTED"):
                         if owns_session:
                             self._session = None
             else:
-                # Use existing session
+                # Use existing session or run without transaction if SQLAlchemy unavailable
                 return await func(self, *args, **kwargs)
         
         return wrapper
@@ -86,13 +92,13 @@ class UnitOfWork:
     Ensures all repositories within a handler use the same session.
     """
     
-    def __init__(self, session: AsyncSession = None):
+    def __init__(self, session=None):
         self._session = session
         self._owns_session = session is None
         self._repositories = {}
     
     async def __aenter__(self):
-        if self._owns_session:
+        if self._owns_session and SQLALCHEMY_AVAILABLE:
             self._session = await get_async_session().__aenter__()
         return self
     
@@ -118,7 +124,7 @@ class UnitOfWork:
             logger.debug("Unit of work rolled back")
     
     @property
-    def session(self) -> AsyncSession:
+    def session(self):
         """Get the current session."""
         return self._session
     
@@ -144,6 +150,10 @@ async def transaction_scope(isolation_level: str = "READ_COMMITTED"):
             # Perform database operations
             await session.execute(...)
     """
+    if not SQLALCHEMY_AVAILABLE:
+        yield None
+        return
+        
     async with get_async_session() as session:
         try:
             # Set isolation level

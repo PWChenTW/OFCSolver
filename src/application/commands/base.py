@@ -9,18 +9,13 @@ from uuid import UUID, uuid4
 TResult = TypeVar('TResult')
 
 
-@dataclass
 class Command(ABC):
     """Base class for all commands."""
-    command_id: UUID = None
-    timestamp: datetime = None
-    user_id: Optional[str] = None
     
-    def __post_init__(self):
-        if self.command_id is None:
-            self.command_id = uuid4()
-        if self.timestamp is None:
-            self.timestamp = datetime.utcnow()
+    def __init__(self, user_id: Optional[str] = None):
+        self.user_id = user_id
+        self.command_id = uuid4()
+        self.timestamp = datetime.utcnow()
 
 
 class CommandHandler(ABC, Generic[TResult]):
