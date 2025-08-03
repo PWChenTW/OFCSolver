@@ -105,6 +105,13 @@ class Card(ValueObject):
     suit: Suit
     rank: Rank
 
+    def __post_init__(self):
+        """Validate card creation parameters."""
+        if not isinstance(self.suit, Suit):
+            raise TypeError(f"suit must be a Suit enum, got {type(self.suit)}")
+        if not isinstance(self.rank, Rank):
+            raise TypeError(f"rank must be a Rank enum, got {type(self.rank)}")
+
     def __str__(self) -> str:
         """String representation (e.g., 'As', 'Kh', '2c')."""
         return f"{self.rank.symbol}{self.suit.value}"
@@ -112,6 +119,26 @@ class Card(ValueObject):
     def __repr__(self) -> str:
         """Detailed representation."""
         return f"Card({self.rank.name}, {self.suit.name})"
+
+    def __lt__(self, other: "Card") -> bool:
+        """Less than comparison - compare by rank first, then suit."""
+        if self.rank != other.rank:
+            return self.rank < other.rank
+        # For same rank, compare by suit (spades > hearts > diamonds > clubs)
+        suit_order = {Suit.CLUBS: 1, Suit.DIAMONDS: 2, Suit.HEARTS: 3, Suit.SPADES: 4}
+        return suit_order[self.suit] < suit_order[other.suit]
+
+    def __le__(self, other: "Card") -> bool:
+        """Less than or equal comparison."""
+        return self < other or self == other
+
+    def __gt__(self, other: "Card") -> bool:
+        """Greater than comparison."""
+        return not self <= other
+
+    def __ge__(self, other: "Card") -> bool:
+        """Greater than or equal comparison."""
+        return not self < other
 
     @classmethod
     def from_string(cls, card_str: str) -> "Card":
@@ -201,6 +228,8 @@ class Card(ValueObject):
         Returns:
             List of Card instances
         """
+        if not cards_str.strip():
+            return []
         card_strings = cards_str.strip().split()
         return [Card.from_string(card_str) for card_str in card_strings]
 
@@ -220,10 +249,12 @@ class Card(ValueObject):
     @staticmethod
     def group_by_rank(cards: List["Card"]) -> dict[Rank, List["Card"]]:
         """Group cards by rank."""
-        groups = {rank: [] for rank in Rank}
+        groups = {}
         for card in cards:
+            if card.rank not in groups:
+                groups[card.rank] = []
             groups[card.rank].append(card)
-        return {rank: cards_list for rank, cards_list in groups.items() if cards_list}
+        return groups
 
     @staticmethod
     def sort_by_rank(cards: List["Card"], descending: bool = True) -> List["Card"]:
@@ -233,7 +264,7 @@ class Card(ValueObject):
     @staticmethod
     def sort_by_suit(cards: List["Card"]) -> List["Card"]:
         """Sort cards by suit."""
-        suit_order = {Suit.SPADES: 4, Suit.HEARTS: 3, Suit.DIAMONDS: 2, Suit.CLUBS: 1}
+        suit_order = {Suit.CLUBS: 1, Suit.DIAMONDS: 2, Suit.HEARTS: 3, Suit.SPADES: 4}
         return sorted(cards, key=lambda c: (suit_order[c.suit], c.rank.numeric_value))
 
     @staticmethod

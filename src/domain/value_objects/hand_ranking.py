@@ -105,8 +105,11 @@ class HandRanking(ValueObject):
 
     @property
     def is_monster_hand(self) -> bool:
-        """Check if this is a monster hand (straight or better)."""
-        return self.hand_type.value >= HandType.STRAIGHT.value
+        """Check if this is a monster hand (straight, flush, or straight flush+ but not full house)."""
+        # Monster hands are straights, flushes, and straight flush+, but NOT full house
+        return (self.hand_type == HandType.STRAIGHT or 
+                self.hand_type == HandType.FLUSH or
+                self.hand_type.value >= HandType.STRAIGHT_FLUSH.value)
 
     @property
     def has_royalty(self) -> bool:
@@ -203,10 +206,12 @@ class HandRanking(ValueObject):
             return f"Three {trips_rank}s" if trips_rank else "Three of a Kind"
 
         elif self.hand_type == HandType.STRAIGHT:
-            high_card = max(card.rank for card in self.cards)
-            if high_card.numeric_value == 5:  # Wheel straight
+            # Check for wheel straight (A-2-3-4-5)
+            if self.strength_value == 5:  # Wheel straight has strength_value of 5
                 return "Straight (5 High)"
-            return f"Straight ({high_card} High)"
+            else:
+                high_card = max(card.rank for card in self.cards)
+                return f"Straight ({high_card} High)"
 
         elif self.hand_type == HandType.FLUSH:
             suit = self.cards[0].suit
@@ -244,11 +249,13 @@ class HandRanking(ValueObject):
             return f"Four {quads_rank}s" if quads_rank else "Four of a Kind"
 
         elif self.hand_type == HandType.STRAIGHT_FLUSH:
-            high_card = max(card.rank for card in self.cards)
             suit = self.cards[0].suit
-            if high_card.numeric_value == 5:  # Wheel straight flush
+            # Check for wheel straight flush (A-2-3-4-5)
+            if self.strength_value == 5:  # Wheel straight flush has strength_value of 5
                 return f"{suit.symbol} Straight Flush (5 High)"
-            return f"{suit.symbol} Straight Flush ({high_card} High)"
+            else:
+                high_card = max(card.rank for card in self.cards)
+                return f"{suit.symbol} Straight Flush ({high_card} High)"
 
         elif self.hand_type == HandType.ROYAL_FLUSH:
             suit = self.cards[0].suit
@@ -279,6 +286,16 @@ class HandRanking(ValueObject):
         """String representation for display."""
         royalty_str = f" (+{self.royalty_bonus} royalty)" if self.has_royalty else ""
         return f"{self.get_hand_description()}{royalty_str}"
+
+    def __hash__(self) -> int:
+        """Hash method to allow use in sets and as dict keys."""
+        return hash((
+            self.hand_type.value,
+            self.strength_value,
+            tuple(self.kickers),
+            self.royalty_bonus,
+            tuple(str(card) for card in self.cards)
+        ))
 
     def __lt__(self, other: "HandRanking") -> bool:
         """Less than comparison."""

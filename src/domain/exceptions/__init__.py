@@ -29,6 +29,7 @@ from .strategy_exceptions import (
     CalculationTimeoutError,
     InsufficientDataError,
     InvalidPositionError,
+    StrategyCalculationError,
     StrategyNotFoundError,
 )
 from .training_exceptions import (
@@ -62,6 +63,7 @@ __all__ = [
     "InvalidPositionError",
     "StrategyNotFoundError",
     "InsufficientDataError",
+    "StrategyCalculationError",
     # Training exceptions
     "TrainingSessionError",
     "ScenarioNotFoundError",
