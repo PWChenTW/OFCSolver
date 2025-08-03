@@ -132,17 +132,18 @@ This document breaks down the OFC Solver System development into actionable task
 - [ ] Add memory management for large trees
 ```
 
-### TASK-009: Strategy Calculator Core 🎯
+### TASK-009: Strategy Calculator Core 🎯 ✅
 **Priority**: Critical
 **Estimated**: 20 hours
 **Dependencies**: TASK-008
+**Status**: COMPLETED
 ```
-- [ ] Implement minimax with alpha-beta pruning
-- [ ] Add position evaluation function
-- [ ] Create EV calculation engine
-- [ ] Implement optimal strategy finder
-- [ ] Add confidence interval calculations
-- [ ] Create performance benchmarks
+- [x] Implement minimax with alpha-beta pruning
+- [x] Add position evaluation function
+- [x] Create EV calculation engine
+- [x] Implement optimal strategy finder
+- [x] Add confidence interval calculations
+- [x] Create performance benchmarks
 ```
 
 ### TASK-010: Monte Carlo Simulator 🎯

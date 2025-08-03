@@ -134,8 +134,6 @@ class GameTreeBuilder(DomainService):
             )
             
             if child_hand is None:
-                # Debug: print why placement failed
-                print(f"DEBUG: Failed to place {card1} and {card2}")
                 continue  # Invalid placement
                 
             # Check for transposition (if enabled)
