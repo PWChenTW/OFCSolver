@@ -14,7 +14,7 @@ from src.application.queries import (
     DateRangeFilter,
 )
 from src.domain.entities.game import Game, GameStatus
-from src.domain.entities.player import Player
+from src.domain.entities.game.player import Player
 from src.domain.value_objects.position import Position as PlayerPosition
 from src.domain.repositories.game_repository import GameRepository
 from src.domain.repositories.player_repository import PlayerRepository

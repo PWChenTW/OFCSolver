@@ -36,7 +36,7 @@ from src.application.queries.query_optimization import (
     QueryOptimizationMiddleware,
 )
 from src.domain.entities.game import Game, GameStatus
-from src.domain.entities.player import Player
+from src.domain.entities.game.player import Player
 from src.domain.entities.strategy import AnalysisSession, CalculationStatus
 from src.domain.entities.training import TrainingSession
 from src.domain.value_objects.difficulty import Difficulty, DifficultyLevel

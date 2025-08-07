@@ -7,6 +7,7 @@ enforces rules, and manages player interactions.
 """
 
 from datetime import datetime
+from enum import Enum
 from typing import Dict, List, Optional
 
 from ...base import AggregateRoot
@@ -17,6 +18,16 @@ from .player import Player, PlayerId, PlayerStatus
 from .position import Position
 
 GameId = str
+
+
+class GameStatus(Enum):
+    """Game status enumeration."""
+    
+    WAITING = "waiting"      # Waiting for players to join
+    IN_PROGRESS = "in_progress"  # Game is currently being played
+    COMPLETED = "completed"  # Game finished normally
+    PAUSED = "paused"       # Game temporarily paused
+    CANCELLED = "cancelled"  # Game was cancelled
 
 
 class Game(AggregateRoot):
