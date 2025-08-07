@@ -16,7 +16,7 @@ from src.application.queries import (
     TimeRange,
 )
 from src.domain.entities.training import TrainingSession, Exercise
-from src.domain.entities.scenario import Scenario
+from src.domain.entities.training.scenario import Scenario
 from src.domain.value_objects.difficulty import Difficulty, DifficultyLevel
 from src.domain.value_objects.performance import Performance
 from src.domain.repositories.training_repository import TrainingRepository
