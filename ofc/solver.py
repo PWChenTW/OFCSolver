@@ -107,3 +107,24 @@ def heuristic_layout(cards: list[Card]) -> Layout:
         middle=tuple(s[3:8]),
         back=tuple(s[8:13]),
     )
+
+
+def heuristic_completion(state, future_cards: list[Card]) -> Layout:
+    """把 future_cards 用簡單規則填滿 state 剩餘空位。
+
+    與 heuristic_layout 同思路：sort by rank ascending，弱的補前墩、強的補後墩。
+    可能犯規（partial state 可能與 future cards 結合產生不合 sequencing 的 layout）。
+    """
+    fc = state.front_capacity()
+    mc = state.middle_capacity()
+    bc = state.back_capacity()
+    if fc + mc + bc != len(future_cards):
+        raise ValueError(
+            f"need {fc + mc + bc} future cards, got {len(future_cards)}"
+        )
+    s = sorted(future_cards, key=lambda c: (c.rank, c.suit))
+    return Layout(
+        front=state.front + tuple(s[:fc]),
+        middle=state.middle + tuple(s[fc : fc + mc]),
+        back=state.back + tuple(s[fc + mc :]),
+    )
