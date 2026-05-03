@@ -91,3 +91,19 @@ def best_fantasyland_layout(cards: list[Card]) -> Layout | None:
             best = layout
 
     return best
+
+
+def heuristic_layout(cards: list[Card]) -> Layout:
+    """Sort 13 張 by rank ascending → 最弱 3 給前、中 5 給中、最強 5 給後。
+
+    速度快（µs 級）但會偶爾犯規（例如中墩湊出順子但後墩沒對應強牌型）。
+    用於 MC rollout 中當對手 policy；單方求最佳擺法請用 best_layout。
+    """
+    if len(cards) != 13:
+        raise ValueError(f"heuristic_layout expects 13 cards, got {len(cards)}")
+    s = sorted(cards, key=lambda c: (c.rank, c.suit))
+    return Layout(
+        front=tuple(s[:3]),
+        middle=tuple(s[3:8]),
+        back=tuple(s[8:13]),
+    )
