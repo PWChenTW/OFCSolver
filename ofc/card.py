@@ -33,6 +33,9 @@ class Card:
     rank: Rank
     suit: Suit
 
+    def __hash__(self) -> int:
+        return self.rank * 4 + self.suit
+
     def __str__(self) -> str:
         return f"{RANK_CHARS[self.rank - 2]}{SUIT_CHARS[self.suit]}"
 
