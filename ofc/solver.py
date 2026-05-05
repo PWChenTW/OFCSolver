@@ -351,12 +351,103 @@ def heuristic_layout(cards: list[Card]) -> Layout:
     return _pick_best(candidates, fallback=candidates[0])
 
 
-def heuristic_completion(state, future_cards: list[Card]) -> Layout:
-    """把 future_cards 用 heuristic 填滿 state 剩餘空位。
+def _sort_completion(state, future_cards: list[Card]) -> Layout:
+    fc = state.front_capacity()
+    mc = state.middle_capacity()
+    s = sorted(future_cards, key=lambda c: (c.rank, c.suit))
+    return Layout(
+        front=state.front + tuple(s[:fc]),
+        middle=state.middle + tuple(s[fc : fc + mc]),
+        back=state.back + tuple(s[fc + mc :]),
+    )
 
-    對「未來牌+剩餘空位」生成幾個候選分配，挑 royalty 最高且不犯規。
-    候選：sort ascending、group by rank。
-    可能犯規（state 已 placed 的部分可能限制了空間），fallback 用 sort。
+
+def _grouped_completion(state, future_cards: list[Card]) -> Layout:
+    fc = state.front_capacity()
+    mc = state.middle_capacity()
+    counts = Counter(c.rank for c in future_cards)
+    s = sorted(future_cards, key=lambda c: (counts[c.rank], c.rank, c.suit))
+    return Layout(
+        front=state.front + tuple(s[:fc]),
+        middle=state.middle + tuple(s[fc : fc + mc]),
+        back=state.back + tuple(s[fc + mc :]),
+    )
+
+
+def _rank_match_completion(state, future_cards: list[Card]) -> Layout:
+    """Place future groups (by rank) into pile that already has matching ranks.
+
+    Goal: 把 future 的 same-rank 集中放到 state 對應墩，形成對子/三條/四條。
+    Tie-break: 更強的 cards 偏向 back (避免 front 過強犯規)。
+    """
+    front_counts = Counter(c.rank for c in state.front)
+    middle_counts = Counter(c.rank for c in state.middle)
+    back_counts = Counter(c.rank for c in state.back)
+    fc = state.front_capacity()
+    mc = state.middle_capacity()
+    bc = state.back_capacity()
+    front_add: list[Card] = []
+    middle_add: list[Card] = []
+    back_add: list[Card] = []
+
+    by_rank: dict[int, list[Card]] = {}
+    for c in future_cards:
+        by_rank.setdefault(c.rank, []).append(c)
+    # Larger groups first, then higher rank first
+    groups = sorted(by_rank.values(), key=lambda g: (-len(g), -g[0].rank))
+
+    def place(c: Card, pile: str) -> None:
+        if pile == "F":
+            front_add.append(c)
+            front_counts[c.rank] += 1
+        elif pile == "M":
+            middle_add.append(c)
+            middle_counts[c.rank] += 1
+        else:
+            back_add.append(c)
+            back_counts[c.rank] += 1
+
+    def best_pile(rank: int, room: int) -> str | None:
+        opts = []
+        if fc - len(front_add) >= room:
+            opts.append((front_counts.get(rank, 0), 0, "F"))
+        if mc - len(middle_add) >= room:
+            opts.append((middle_counts.get(rank, 0), 1, "M"))
+        if bc - len(back_add) >= room:
+            opts.append((back_counts.get(rank, 0), 2, "B"))
+        if not opts:
+            return None
+        # most matches, ties broken by back > middle > front
+        opts.sort(key=lambda x: (-x[0], -x[1]))
+        return opts[0][2]
+
+    for group in groups:
+        rank = group[0].rank
+        whole = best_pile(rank, len(group))
+        if whole is not None:
+            for c in group:
+                place(c, whole)
+        else:
+            # group too big for any single pile, split card by card
+            for c in group:
+                p = best_pile(c.rank, 1)
+                if p is None:
+                    continue  # capacity mismatch (shouldn't happen)
+                place(c, p)
+
+    return Layout(
+        front=state.front + tuple(front_add),
+        middle=state.middle + tuple(middle_add),
+        back=state.back + tuple(back_add),
+    )
+
+
+def heuristic_completion(state, future_cards: list[Card]) -> Layout:
+    """Multi-candidate partial completion: 列舉幾個策略挑 royalty 最高合法。
+
+    若 state 完全空（街 0 case，其實應該直接呼 heuristic_layout，但仍支援），
+    delegate 給 smart heuristic_layout 拿到全套候選。
+    其他情況用 sort/grouped/rank-match 三個候選。
     """
     fc = state.front_capacity()
     mc = state.middle_capacity()
@@ -366,27 +457,12 @@ def heuristic_completion(state, future_cards: list[Card]) -> Layout:
             f"need {fc + mc + bc} future cards, got {len(future_cards)}"
         )
 
-    candidates: list[Layout] = []
+    if state.slots_remaining() == 13:
+        return heuristic_layout(future_cards)
 
-    # Sort ascending → weak to front
-    s_asc = sorted(future_cards, key=lambda c: (c.rank, c.suit))
-    candidates.append(
-        Layout(
-            front=state.front + tuple(s_asc[:fc]),
-            middle=state.middle + tuple(s_asc[fc : fc + mc]),
-            back=state.back + tuple(s_asc[fc + mc :]),
-        )
-    )
-
-    # Group by rank within future cards (keeps pairs together)
-    counts = Counter(c.rank for c in future_cards)
-    s_grp = sorted(future_cards, key=lambda c: (counts[c.rank], c.rank, c.suit))
-    candidates.append(
-        Layout(
-            front=state.front + tuple(s_grp[:fc]),
-            middle=state.middle + tuple(s_grp[fc : fc + mc]),
-            back=state.back + tuple(s_grp[fc + mc :]),
-        )
-    )
-
-    return _pick_best(candidates, fallback=candidates[0])
+    candidates: list[Layout] = [
+        _sort_completion(state, future_cards),
+        _grouped_completion(state, future_cards),
+        _rank_match_completion(state, future_cards),
+    ]
+    return _pick_best(candidates, candidates[0])
